@@ -1,26 +1,34 @@
 # software-engineering-project
+
 <<<<<<< Updated upstream
     记得签到
-=======
+============
 
     记得签到后端代码
->>>>>>> Stashed changes
 
+>>>>>>> Stashed changes
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>
+>>>
+>>
 
 ## 文件结构
 
+```
 app
 ├── .github
 │   └── workflows
 │       └── continuous_integration.yml
 ├── .hgignore
 ├── app
-│   ├── __init__.py
+│   ├── init.py
 │   ├── config.py
 │   ├── main.py
 │   ├── resources.py
 │   └── routers
-│       ├── __init__.py
+│       ├── init.py
 │       └── hello.py
 ├── hypercorn.toml
 ├── Makefile
@@ -30,26 +38,38 @@ app
 ├── scripts
 │   └── install_hooks.sh
 └── tests
-    ├── __init__.py
+    ├── init.py
     │
     ├── conftest.py
     └── routers
-        ├── __init__.py
+        ├── init.py
         └── test_hello.py
-
+```
 
 ## 组员
 
-    钟贤杰
-    林少涵
-    周建辉
-    黄博远
-    范嘉诚
+```
+钟贤杰
+林少涵  
+周建辉
+黄博远
+范嘉诚
+```
+
+
 <<<<<<< Updated upstream
-=======
+========================
+
     李靖雯
 
 >>>>>>> Stashed changes
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>
+>>>
+>>
+
 ## 仓库配置
 
     仓库包含两个特殊分支
