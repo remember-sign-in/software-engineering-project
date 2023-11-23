@@ -1,0 +1,10 @@
+workers = 3
+preload_app = True
+bind = '127.0.0.1:8000'
+daemon = 'true'
+worker_class = 'uvicorn.workers.UvicornWorker'
+accesslog = './logs/access.log'
+access_log_format='%(t)s - %(u)s - %(s)s - %(H)s'
+errorlog = './logs/error.log'
+loglevel = 'info'
+timeout = 50
