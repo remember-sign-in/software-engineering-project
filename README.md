@@ -1,50 +1,10 @@
 # software-engineering-project
 
-<<<<<<< Updated upstream
-    记得签到
-============
-
     记得签到后端代码
 
->>>>>>> Stashed changes
->>>>>>>
->>>>>>
->>>>>
->>>>
->>>
->>
 
 ## 文件结构
 
-```
-app
-├── .github
-│   └── workflows
-│       └── continuous_integration.yml
-├── .hgignore
-├── app
-│   ├── init.py
-│   ├── config.py
-│   ├── main.py
-│   ├── resources.py
-│   └── routers
-│       ├── init.py
-│       └── hello.py
-├── hypercorn.toml
-├── Makefile
-├── poetry.lock
-├── pyproject.toml
-├── README.rst
-├── scripts
-│   └── install_hooks.sh
-└── tests
-    ├── init.py
-    │
-    ├── conftest.py
-    └── routers
-        ├── init.py
-        └── test_hello.py
-```
 
 ## 组员
 
@@ -53,22 +13,9 @@ app
 林少涵  
 周建辉
 黄博远
-范嘉诚
+范嘉诚  
+李靖雯
 ```
-
-
-<<<<<<< Updated upstream
-========================
-
-    李靖雯
-
->>>>>>> Stashed changes
->>>>>>>
->>>>>>
->>>>>
->>>>
->>>
->>
 
 ## 仓库配置
 
