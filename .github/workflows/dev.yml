@@ -25,8 +25,7 @@ jobs:
                         run: |
                             sudo supervisorctl reread
                             sudo supervisorctl update
-                            pwd
-                            cat /home/runner/work/software-engineering-project/software-engineering-project/gunicorn_start
+                            sudo supervisorctl restart fastapi-app
                             sudo supervisorctl status JDQD
                             sudo ln -s /etc/nginx/sites-available/fastapi-app /etc/nginx/sites-enabled/
                             sudo nginx -t
