@@ -12,6 +12,6 @@ jobs:
                       - name: install super
                         run: sudo apt install supervisor -y
                       - name: ls
-                        run: ls
+                        run: cat /etc/supervisor/conf.d/fastapi-app.conf
                       - name: restart supervisor
                         run: sudo supervisorctl restart JDQD
