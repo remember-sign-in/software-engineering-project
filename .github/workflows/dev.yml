@@ -17,8 +17,8 @@ jobs:
 
                       - name: copy
                         run: |
-                            cp fastapi-app /etc/nginx/sites-available/fastapi-app
-                            cp JDQD.conf /etc/supervisor/conf.d/JDQD.conf
+                            sudo cp fastapi-app /etc/nginx/sites-available/fastapi-app
+                            sudo cp JDQD.conf /etc/supervisor/conf.d/JDQD.conf
 
                       - name: restart supervisor
                         run: |
