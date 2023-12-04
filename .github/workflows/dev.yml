@@ -17,6 +17,7 @@ jobs:
 
                       - name: copy
                         run: |
+                            chmod u+x gunicorn_start
                             sudo cp fastapi-app /etc/nginx/sites-available/fastapi-app
                             sudo cp JDQD.conf /etc/supervisor/conf.d/JDQD.conf
 
