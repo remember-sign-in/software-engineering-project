@@ -9,4 +9,4 @@ jobs:
                runs-on: ubuntu-latest
                steps:
                       - name: restart supervisor
-                        run: sudo supervisorctl restart JDQD
+                        run: supervisorctl restart JDQD
