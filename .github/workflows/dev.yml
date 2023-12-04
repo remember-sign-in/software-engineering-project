@@ -8,5 +8,7 @@ jobs:
                name: restart job
                runs-on: ubuntu-latest
                steps:
+                      - name: enter venv
+                        run: source .venv/bin/activate
                       - name: restart supervisor
                         run: supervisorctl restart JDQD
