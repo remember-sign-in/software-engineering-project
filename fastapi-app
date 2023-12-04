@@ -1,5 +1,5 @@
 upstream app_server {
-    server unix:/home/runner/work/software-engineering-project/run/gunicorn.sock fail_timeout=0;
+    server unix:/home/runner/work/software-engineering-project/software-engineering-project/run/gunicorn.sock fail_timeout=0;
 }
  
 server {
