@@ -4,9 +4,9 @@ on:
                         - zxj-dev
                           
 jobs:                     
-         restart-job:
-                 name: restart job
-                runs-on: ubuntu-latest
-                steps:
-                        - name: restart supervisor
-                          run: sudo supervisorctl restart JDQD
+       restart-job:
+               name: restart job
+               runs-on: ubuntu-latest
+               steps:
+                      - name: restart supervisor
+                        run: sudo supervisorctl restart JDQD
