@@ -11,6 +11,6 @@ jobs:
                       - name: pwd
                         run: pwd
                       - name: enter venv
-                        run: source /home/fastapi-user/software-engineering-project/.venv/bin/activate
+                        run: source /home/runner/work/software-engineering-project/.venv/bin/activate
                       - name: restart supervisor
                         run: supervisorctl restart JDQD
