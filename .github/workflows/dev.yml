@@ -15,3 +15,4 @@ jobs:
                         run: cat /etc/supervisor/conf.d/fastapi-app.conf
                       - name: restart supervisor
                         run: sudo supervisorctl restart JDQD
+
