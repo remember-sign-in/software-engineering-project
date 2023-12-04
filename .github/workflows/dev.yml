@@ -25,8 +25,7 @@ jobs:
                         run: |
                             sudo supervisorctl reread
                             sudo supervisorctl update
-                            sudo supervisorctl restart JDQD
-                            sudo supervisorctl status JDQD
                             sudo ln -s /etc/nginx/sites-available/fastapi-app /etc/nginx/sites-enabled/
                             sudo nginx -t
                             sudo systemctl restart nginx
+                            sudo supervisorctl restart JDQD
