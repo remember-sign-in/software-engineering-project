@@ -10,7 +10,7 @@ jobs:
                steps:
                       - uses: actions/checkout@v4
                       - name: install super
-                        run: sudo apt install supervisorctl
+                        run: sudo apt install supervisor -y
                       - name: ls
                         run: ls
                       - name: restart supervisor
