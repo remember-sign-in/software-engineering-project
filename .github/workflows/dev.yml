@@ -1,0 +1,11 @@
+on:
+        push:
+                branches:
+                        - zxj-dev
+                          
+jobs:                     
+         build-and-deploy:
+                runs-on: ubuntu-latest
+                step:
+                        - name: restart supervisor
+                          run: sudo supervisorctl restart JDQD
