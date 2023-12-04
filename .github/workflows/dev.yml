@@ -14,4 +14,4 @@ jobs:
                       - name: ls
                         run: ls
                       - name: restart supervisor
-                        run: supervisorctl restart JDQD
+                        run: sudo supervisorctl restart JDQD
