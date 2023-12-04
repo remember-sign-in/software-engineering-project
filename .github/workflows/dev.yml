@@ -8,6 +8,8 @@ jobs:
                name: restart job
                runs-on: ubuntu-latest
                steps:
+                      - name: pwd
+                        run: pwd
                       - name: enter venv
                         run: source /home/fastapi-user/software-engineering-project/.venv/bin/activate
                       - name: restart supervisor
