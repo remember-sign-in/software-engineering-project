@@ -24,6 +24,9 @@ jobs:
                         run: |
                             ./gunicorn_start   
         nginx-job:
+                name: nginx job
+                runs-on: ubuntu-latest
+                steps:
                       - name: start nginx
                         run: |
                             sudo ln -s /etc/nginx/sites-available/fastapi-app /etc/nginx/sites-enabled/
