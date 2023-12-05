@@ -28,4 +28,4 @@ jobs:
                             sudo ln -s /etc/nginx/sites-available/JDQD /etc/nginx/sites-enabled/
                             sudo nginx -t
                             sudo systemctl restart nginx
-                            gunicorn main:app --name JDQD --workers 3 --worker-class uvicorn.workers.UvicornWorker --user=runner --group=runner --bind=unix:/home/runner/work/software-engineering-project/software-engineering-project/gunicorn.sock -m 777 --log-level=error --log-file=-
+                            gunicorn main:app --name JDQD --workers 3 --worker-class uvicorn.workers.UvicornWorker --user=runner --group=runner --bind=unix:gunicorn.sock -m 777 --log-level=error --log-file=-
