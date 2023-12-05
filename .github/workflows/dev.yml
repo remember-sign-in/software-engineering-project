@@ -23,7 +23,7 @@ jobs:
                       - name: restart supervisor
                         run: |
                             ./gunicorn_start   
-        nginx-job:
+       nginx-job:
                       - uses: actions/checkout@v4
                       - name: start nginx
                         run: |
