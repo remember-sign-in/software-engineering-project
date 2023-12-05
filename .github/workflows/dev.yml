@@ -10,7 +10,7 @@ jobs:
                steps:
                       - uses: actions/checkout@v4
                       - name: install super
-                        run: sudo apt install supervisor -y
+                        run: sudo apt install gunicorn -y
                       - name: pip
                         run: pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple some-package
 
@@ -21,8 +21,16 @@ jobs:
                             sudo cp JDQD /etc/nginx/sites-available/JDQD
                             pwd
                             mkdir run
-                            ls 
-                            sudo ./gunicorn_start
+                            ls
+                           gunicorn main:app \
+--name JDQD \
+--workers 3 \
+--worker-class uvicorn.workers.UvicornWorker \
+--user=runner \
+--group=runner \
+--bind= unix:/home/runner/work/software-engineering-project/software-engineering-project/run/gunicorn.sock \
+--log-level=error \
+--log-file=-
                       - name: restart supervisor
                         run: |
                             sudo ln -s /etc/nginx/sites-available/JDQD /etc/nginx/sites-enabled/
