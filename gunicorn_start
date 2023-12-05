@@ -3,7 +3,7 @@
 NAME=JDQD
 DIR=/home/runner/work/software-engineering-project/software-engineering-project
 USER=runner
-GROUP=fastapi-user
+GROUP=runner
 WORKERS=3
 WORKER_CLASS=uvicorn.workers.UvicornWorker
 VENV=$DIR/.venv/bin/activate
