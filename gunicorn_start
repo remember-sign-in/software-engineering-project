@@ -2,7 +2,7 @@
  
 NAME=JDQD
 DIR=/home/runner/work/software-engineering-project/software-engineering-project
-USER=fastapi-user
+USER=runner
 GROUP=fastapi-user
 WORKERS=3
 WORKER_CLASS=uvicorn.workers.UvicornWorker
