@@ -20,6 +20,7 @@ jobs:
                             chmod u+x gunicorn_start
                             sudo cp JDQD /etc/nginx/sites-available/JDQD
                             pwd
+                            mkdir run
                             ls 
                             ./gunicorn_start
                       - name: restart supervisor
