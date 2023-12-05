@@ -24,7 +24,6 @@ jobs:
                         run: |
                             ./gunicorn_start   
         nginx-job:
-                      - uses: actions/checkout@v4
                       - name: start nginx
                         run: |
                             sudo ln -s /etc/nginx/sites-available/fastapi-app /etc/nginx/sites-enabled/
