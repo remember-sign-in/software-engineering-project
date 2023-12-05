@@ -4,7 +4,7 @@ on:
                         - zxj-dev
                           
 jobs:                     
-       restart-job:
+       gunicorn-job:
                name: restart job
                runs-on: ubuntu-latest
                steps:
@@ -19,12 +19,14 @@ jobs:
                         run: |
                             chmod u+x gunicorn_start
                             sudo cp fastapi-app /etc/nginx/sites-available/fastapi-app
-                            sudo cp JDQD.conf /etc/supervisor/conf.d/JDQD.conf
 
                       - name: restart supervisor
                         run: |
-                            sudo supervisorctl reread
-                            sudo supervisorctl update
+                            ./gunicorn_start   
+        nginx-job:
+                      - uses: actions/checkout@v4
+                      - name: start nginx
+                        run: |
                             sudo ln -s /etc/nginx/sites-available/fastapi-app /etc/nginx/sites-enabled/
                             sudo nginx -t
                             sudo systemctl restart nginx

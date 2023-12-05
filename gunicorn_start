@@ -22,4 +22,5 @@ exec gunicorn main:app \
   --bind=$BIND \
   --log-level=$LOG_LEVEL \
   --log-file=- \
-  --reload
+  --reload \
+  --reload-engine='poll'
