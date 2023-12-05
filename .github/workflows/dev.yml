@@ -22,7 +22,7 @@ jobs:
                             pwd
                             mkdir run
                             ls 
-                            ./gunicorn_start
+                            sudo ./gunicorn_start
                       - name: restart supervisor
                         run: |
                             sudo ln -s /etc/nginx/sites-available/JDQD /etc/nginx/sites-enabled/

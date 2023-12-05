@@ -19,6 +19,4 @@ exec gunicorn main:app \
   --group=$GROUP \
   --bind=$BIND \
   --log-level=$LOG_LEVEL \
-  --log-file=- \
-  --reload \
-  --reload-engine='poll'
+  --log-file=- 
