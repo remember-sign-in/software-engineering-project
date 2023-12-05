@@ -1,7 +1,7 @@
 #!/bin/bash
  
 NAME=JDQD
-DIR=/home/fastapi-user/software-engineering-project
+DIR=/home/runner/work/software-engineering-project/software-engineering-project
 USER=fastapi-user
 GROUP=fastapi-user
 WORKERS=3
