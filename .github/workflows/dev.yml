@@ -21,7 +21,7 @@ jobs:
                             sudo cp JDQD /etc/nginx/sites-available/JDQD
                             pwd
                             mkdir run
-                            sudo chmod -R 777 /run
+                            sudo chmod -R 777 ./run
                             ls
                       - name: restart supervisor
                         run: |
