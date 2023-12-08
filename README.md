@@ -1,19 +1,37 @@
 # software-engineering-project
 
+
     记得签到后端代码
 
-
 ## 文件结构
+
+```
+app
+├── .github
+│   └── workflows
+│       └── dev.yml
+└── src
+    ├── init.py
+    ├── main.py
+    ├── crud.py
+    ├── database.py
+    ├── models.py
+    ├── schemas.py
+    └── data
+        ├── init.py
+        └── data.py
+```
 
 
 ## 组员
 
 ```
+
 钟贤杰
 林少涵  
 周建辉
 黄博远
-范嘉诚  
+范嘉诚
 李靖雯
 ```
 
