@@ -8,10 +8,12 @@ jobs:
                name: restart job
                runs-on: ubuntu-latest
                steps:
-                        - uses: actions/checkout@v4
+                        - name: checkout
+                          uses: actions/checkout@v4
+                        - run: echo hello > world.txt
                 # 发布到目标服务器
                         - name: Upload
-                          uses: appleboy/scp-action@master
+                          uses: appleboy/scp-action@v0.1.4
                           with:
                             host: ${{ secrets.REMOTE_HOST }} # 公网ip
                             username: ${{ secrets.REMOTE_USERNAME }} # 用户名
