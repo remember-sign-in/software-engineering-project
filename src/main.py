@@ -54,7 +54,7 @@ def getid(code: str, db: Session = Depends(get_db)):
 
 @app.get("/test")
 def test():
-    return {"msg": "hello worlddddddd!!!!"}
+    return {"test": "测试成功"}
 
 
 if __name__ == "__main__":
