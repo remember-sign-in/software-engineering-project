@@ -9,8 +9,10 @@ jobs:
                runs-on: ubuntu-latest
                steps:
                         - uses: actions/checkout@v4
-                        - run: echo hello > world.txt 
-                                
+                        - run: |
+                                echo hello > world.txt 
+                                ls
+                                pwd
                         # 发布到目标服务器
                         - name: deploy file
                           uses: wlixcc/SFTP-Deploy-Action@v1.2.4
@@ -18,6 +20,6 @@ jobs:
                                 username: ${{ secrets.HOST }}
                                 server: ${{ secrets.USERNAME }}
                                 ssh_private_key: ${{ secrets.ALIYUN }} 
-                                local_path: '.'
+                                local_path: './world.txt '
                                 remote_path: '/home/fastapi-user/action_test'
 
