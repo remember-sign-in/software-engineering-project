@@ -8,23 +8,14 @@ jobs:
                name: restart job
                runs-on: ubuntu-latest
                steps:
-                      - uses: actions/checkout@v4
-                      - name: install super
-                        run: sudo apt install gunicorn -y
-                      - name: pip
-                        run: pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple some-package
+                        - uses: actions/checkout@v4
+                # 发布到目标服务器
+                        - name: Upload
+                          uses: appleboy/scp-action@master
+                          with:
+                            host: ${{ secrets.REMOTE_HOST }} # 公网ip
+                            username: ${{ secrets.REMOTE_USERNAME }} # 用户名
+                            key: ${{ secrets.ALIYUN }} # 私钥
+                            source: "" # 发送文件
+                            target: "/home/fastapi-user/action_test" # 目标目录
 
-
-                      - name: copy
-                        run: |
-                            chmod u+x gunicorn_start
-                            sudo cp JDQD /etc/nginx/sites-available/JDQD
-                            pwd
-                            mkdir run
-                            sudo chmod -R 777 /home/runner/work/software-engineering-project/software-engineering-project/run
-                            ls
-                      - name: restart supervisor
-                        run: |
-                            sudo ln -s /etc/nginx/sites-available/JDQD /etc/nginx/sites-enabled/
-                            sudo nginx -t
-                            sudo systemctl restart nginx
