@@ -8,16 +8,16 @@ jobs:
                name: restart job
                runs-on: ubuntu-latest
                steps:
-                        - name: checkout
-                          uses: actions/checkout@v4
-                        - run: echo hello > world.txt
-                # 发布到目标服务器
-                        - name: Upload
-                          uses: appleboy/scp-action@v0.1.4
+                        - uses: actions/checkout@v4
+                        - run: echo hello > world.txt 
+                                
+                        # 发布到目标服务器
+                        - name: deploy file
+                          uses: wlixcc/SFTP-Deploy-Action@v1.2.4
                           with:
-                            host: ${{ secrets.REMOTE_HOST }} # 公网ip
-                            username: ${{ secrets.REMOTE_USERNAME }} # 用户名
-                            key: ${{ secrets.ALIYUN }} # 私钥
-                            source: "" # 发送文件
-                            target: "/home/fastapi-user/action_test" # 目标目录
+                                username: ${{ secrets.HOST }}
+                                server: ${{ secrets.USERNAME }}
+                                ssh_private_key: ${{ secrets.ALIYUN }} 
+                                local_path: '.'
+                                remote_path: '/home/fastapi-user/action_test'
 
