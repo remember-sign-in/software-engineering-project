@@ -8,18 +8,14 @@ jobs:
                name: restart job
                runs-on: ubuntu-latest
                steps:
-                        - uses: actions/checkout@v4
-                        - run: |
-                                echo hello > world.txt 
-                                ls ./src/
-                                pwd
-                        # 发布到目标服务器
-                        - name: deploy file
-                          uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-                          with:
-                                username: ${{ secrets.HOST }}
-                                server: ${{ secrets.USERNAME }}
-                                ssh_private_key: ${{ secrets.ALIYUN }} 
-                                local_path: './world.txt'
-                                remote_path: '/home/fastapi-user/action_test'
+                - name: Checkout
+                  uses: actions/checkout@v2
+                - name: deploy file
+                  uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+                  with:
+                        username: ${{ secrets.REMOTE_HOST }}
+                        server: ${{ secrets.REMOTE_USERNAME }}
+                        ssh_private_key: ${{ secrets.ALIYUN }} 
+                        remote_path: '/home/fastapi-user/action_test'
+
 
