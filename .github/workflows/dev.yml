@@ -1,7 +1,7 @@
 on:
         push:
                 branches:
-                        - zxj-dev
+                        - dev
                           
 jobs:                     
        restart-job:
