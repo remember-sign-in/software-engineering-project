@@ -11,7 +11,7 @@ jobs:
                         - uses: actions/checkout@v4
                         - run: |
                                 echo hello > world.txt 
-                                ls
+                                ls ./src/
                                 pwd
                         # 发布到目标服务器
                         - name: deploy file
@@ -20,6 +20,6 @@ jobs:
                                 username: ${{ secrets.HOST }}
                                 server: ${{ secrets.USERNAME }}
                                 ssh_private_key: ${{ secrets.ALIYUN }} 
-                                local_path: './world.txt '
+                                local_path: './world.txt'
                                 remote_path: '/home/fastapi-user/action_test'
 
