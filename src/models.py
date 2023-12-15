@@ -1,5 +1,7 @@
+import datetime
+
 from database import Base
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, DateTime, func
 
 
 class User(Base):
@@ -25,3 +27,20 @@ class JoinClass(Base):
     __tablename__ = "JoinClass"
     class_id = Column(String(15), primary_key=True, index=True, nullable=False)
     user_id = Column(String(15), primary_key=True, index=True, nullable=False)
+
+
+class signInRecord(Base):
+    __tablename__ = "signInRecord"
+    check_in_id = Column(String(15), primary_key=True, index=True, nullable=False)
+    student_id = Column(String(15), index=True, nullable=False)
+    signIn_time = Column(String(15), index=True, nullable=False)
+    signIn_status = Column(Integer, index=True, nullable=False)
+
+
+class checkInRecord(Base):
+    __tablename__ = "checkInRecord"
+    check_in_id = Column(Integer, primary_key=True, index=True, autoincrement=True, nullable=False)
+    user_id = Column(String(15), index=True, nullable=False)
+    class_id = Column(String(15), index=True, nullable=False)
+    start_time = Column(datetime, index=True, nullable=False, default=func.now())
+    end_time = Column(datetime, index=True, nullable=False, default=func.now())

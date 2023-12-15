@@ -1,5 +1,8 @@
+import datetime
+
 from sqlalchemy.orm import Session
 import models
+
 
 
 # 获取用户的openid
@@ -73,3 +76,28 @@ def delete_class(db: Session, class_id: str) -> int:
         db.delete(student)
     db.commit()
     return 1
+
+
+def startsign(db: Session, user_id: str, class_id: str, starttime: datetime) -> int:
+    db_class = db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first()
+    if not db_class:
+        return 0
+    db_checkIn = models.checkInRecord(user_id=user_id, class_id=class_id, starttime=starttime)
+    db.add(db_checkIn)
+    db.commit()
+    db.refresh(db_checkIn)
+    return 1
+
+def endsign(db: Session, user_id: str, class_id: str, endtime:datetime) -> int:
+    db_class = db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first()
+    if not db_class:
+        return 0
+    db_checkIn = models.checkInRecord(user_id=user_id, class_id=class_id, endtime=endtime)
+    db.add(db_checkIn)
+    db.commit()
+    db.refresh(db_checkIn)
+    return 1
+
+def signUp(db: Session, user_id: str, class_id: str) -> int:
+    db_checkIn_id = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id).first()
+    return 0

@@ -1,6 +1,10 @@
+from datetime import datetime
+
 import requests
 import uvicorn
 from fastapi import Cookie, Depends, FastAPI, responses
+from sqlalchemy import DateTime
+
 import crud, models, schemas
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
@@ -104,10 +108,57 @@ async def joinClass(id: str, joinCode: str, db: Session = Depends(get_db)):
     else:
         return responses.JSONResponse(content={"message": [{"学生id": id, "result": "已经加入过此班级"}]})
 
+
 @app.delete("/class/deleteClass/{class_id}")
 async def deleteClass(class_id: str, db: Session = Depends(get_db)):
     db_state = crud.delete_class(db, class_id)
     return responses.JSONResponse(content={"state": db_state})
+
+
+@app.post("/user/startSign")
+async def start_sign(user_id: str, class_id: str, starttime: datetime, db: Session = Depends(get_db())):
+    flag = crud.startsign(db, user_id, class_id, starttime)
+    if flag == 1:
+        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "发起签到成功！"}]})
+    else:
+        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "发起签到失败！"}]})
+
+@app.post("/user/endSign")
+async def start_sign(user_id: str, class_id: str, endtime: datetime, db: Session = Depends(get_db())):
+    flag = crud.startsign(db, user_id, class_id, endtime)
+    if flag == 1:
+        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "结束签到成功！"}]})
+    else:
+        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "结束签到失败！"}]})
+# @app.get("/record/list")
+# async def get_list(db: Session = Depends(get_db())):
+#     pass
+#
+#
+# @app.get("/record/detail")
+# async def get_record(db: Session = Depends(get_db())):
+#     pass
+#
+#
+# @app.get("/record/oneRecord")
+# async def get_oneRedcord(db: Session = Depends(get_db())):
+#     pass
+#
+#
+# @app.get("/record/unsignList")
+# async def get_unsignlist(db: Session = Depends(get_db())):
+#     pass
+#
+#
+# @app.get("/record/signList")
+# async def get_signlist(db: Session = Depends(get_db())):
+#     pass
+#
+#
+# @app.delete("/record/del")
+# async def del_record(db: Session = Depends(get_db())):
+#     pass
+
 
 if __name__ == "__main__":
     uvicorn.run(app='main:app', host='0.0.0.0', port=8000, reload=True)
