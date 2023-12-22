@@ -17,8 +17,6 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-
-
 # 连接数据库依赖
 def get_db():
     db = SessionLocal()
@@ -86,11 +84,12 @@ async def getJoinClass(id: str, db: Session = Depends(get_db)):
 
 
 @app.post("/class/create_class")
-async def createClass(classcreate:schemas.ClassCreate, db: Session = Depends(get_db)):
-    db_myclass = crud.create_class(db, classcreate.creator_id, classcreate.name, classcreate.joinCode, classcreate.stuNum)
+async def createClass(classcreate: schemas.ClassCreate, db: Session = Depends(get_db)):
+    db_myclass = crud.create_class(db, classcreate.creator_id, classcreate.name, classcreate.joinCode,
+                                   classcreate.stuNum)
     if not db_myclass:
         return responses.JSONResponse(content={
-        "message": [{"班级id": "null", "班级名称": "null", "result": "JoinCode已被其他班级使用"}]})
+            "message": [{"班级id": "null", "班级名称": "null", "result": "JoinCode已被其他班级使用"}]})
     return responses.JSONResponse(content={
         "message": [{"班级id": db_myclass.class_id, "班级名称": db_myclass.class_name, "result": "创建班级成功"}]})
 
@@ -105,7 +104,7 @@ async def getClassLsit(id: str, db: Session = Depends(get_db)):
 
 
 @app.post("/class/joinClass")
-async def joinClass(classjoin:schemas.ClassJoin, db: Session = Depends(get_db)):
+async def joinClass(classjoin: schemas.ClassJoin, db: Session = Depends(get_db)):
     flag = crud.join_class(db, classjoin.id, classjoin.joinCode)
     if flag == 0:
         return responses.JSONResponse(content={"info": "加入班级失败"})
@@ -122,12 +121,13 @@ async def deleteClass(class_id: str, db: Session = Depends(get_db)):
 
 
 @app.post("/user/startSign")
-async def start_sign(startsign: schemas.sign, db: Session = Depends(get_db)):
-    flag = crud.StartSign(db, startsign)
+async def start_sign(user_id: str, class_id: str, db: Session = Depends(get_db)):
+    current_time = datetime.now()
+    flag = crud.StartSign(db, user_id, class_id, current_time)
     if flag == 1:
-        return responses.JSONResponse(content={"message": [{"班级id": startsign.class_id, "result": "发起签到成功！"}]})
+        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "发起签到成功！"}]})
     else:
-        return responses.JSONResponse(content={"message": [{"班级id": startsign.class_id, "result": "发起签到失败！"}]})
+        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "发起签到失败！"}]})
 
 
 @app.post("/user/endSign")
@@ -142,34 +142,25 @@ async def end_sign(user_id: str, class_id: str, db: Session = Depends(get_db)):
         return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "结束签到失败！"}]})
 
 
-# @app.get("/record/list")
-# async def get_list(db: Session = Depends(get_db())):
-#     pass
-#
-#
-# @app.get("/record/detail")
-# async def get_record(db: Session = Depends(get_db())):
-#     pass
-#
-#
-# @app.get("/record/oneRecord")
-# async def get_oneRedcord(db: Session = Depends(get_db())):
-#     pass
-#
-#
-# @app.get("/record/unsignList")
-# async def get_unsignlist(db: Session = Depends(get_db())):
-#     pass
-#
-#
-# @app.get("/record/signList")
-# async def get_signlist(db: Session = Depends(get_db())):
-#     pass
-#
-#
-# @app.delete("/record/del")
-# async def del_record(db: Session = Depends(get_db())):
-#     pass
+@app.post("/user/signUp")
+async def sign_up(user_id: str, class_id: str, db: Session = Depends(get_db)):
+    current_time = datetime.now()
+    flag = crud.signUp(user_id, class_id, db, current_time)
+    if flag == 1:
+        return responses.JSONResponse(content={"message": [{"用户id": user_id, "result": "签到成功！"}]})
+    else:
+        return responses.JSONResponse(content={"message": [{"用户id": user_id, "result": "签到失败！"}]})
+
+
+@app.post("/user/subSign")
+async def sub_sign(check_id: str, student_id: str, db: Session = Depends(get_db)):
+    flag = crud.subSign(check_id, student_id, db)
+    if flag == 1:
+        return responses.JSONResponse(content={"message": [{"用户id": student_id, "result": "补签成功！"}]})
+    elif flag == 2:
+        return responses.JSONResponse(content={"message": [{"用户id": student_id, "result": "已经签到！"}]})
+    else:
+        return responses.JSONResponse(content={"message": [{"用户id": student_id, "result": "补签失败！"}]})
 
 
 if __name__ == "__main__":

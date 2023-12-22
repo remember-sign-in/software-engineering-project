@@ -23,7 +23,7 @@ class MyClass(Base):
 class JoinClass(Base):
     __tablename__ = "JoinClass"
     class_id = Column(String(20), primary_key=True, index=True, nullable=False)
-    user_id = Column(String(20), primary_key=True, index=True, nullable=False)
+    student_id = Column(String(20), primary_key=True, index=True, nullable=False)
 
 
 class signInRecord(Base):

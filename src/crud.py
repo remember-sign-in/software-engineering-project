@@ -63,7 +63,7 @@ def join_class(db: Session, id: str, joinCode: str) -> int:
         return 0
     if not db.query(models.JoinClass).filter(
             models.JoinClass.user_id == id and models.JoinClass.class_id == db_myclass.class_id).first():
-        db_joinclass = models.JoinClass(user_id=id, class_id=db_myclass.class_id)
+        db_joinclass = models.JoinClass(student_id=id, class_id=db_myclass.class_id)
         db.add(db_joinclass)
         db.commit()
         db.refresh(db_joinclass)
@@ -86,12 +86,12 @@ def delete_class(db: Session, class_id: str) -> int:
     return 1
 
 
-def StartSign(db: Session, startsign: schemas.sign) -> int:
-    db_class = db.query(models.MyClass).filter(models.MyClass.class_id == startsign.class_id).first()
+def StartSign(db: Session, user_id: str, class_id: str, current_time: DateTime) -> int:
+    db_class = db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first()
     if not db_class:
         return 0
-    db_checkIn = models.checkInRecord(user_id=startsign.user_id, class_id=startsign.class_id,
-                                      start_time=startsign.starttime, end_time=startsign.endtime)
+    db_checkIn = models.checkInRecord(user_id=user_id, class_id=class_id,
+                                      start_time=current_time)
     db.add(db_checkIn)
     db.commit()
     db.refresh(db_checkIn)
@@ -110,7 +110,35 @@ def EndSign(db: Session, user_id: str, class_id: str, datetime: DateTime) -> int
     if current_time < db_class.end_time:
         db_class.end_time = current_time
     return 1
-#
-# def signUp(db: Session, user_id: str, class_id: str) -> int:
-#     db_checkIn_id = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id).first()
-#     return 0
+
+
+def signUp(user_id: str, class_id: str, db: Session, currenttime: DateTime) -> int:
+    db_class = db.query(models.checkInRecord).filter(models.checkInRecord.class_id == class_id).first()
+    if db_class.start_time <= currenttime <= db_class.end_time:
+        db_sign = models.signInRecord(check_in_id=db_class.check_in_id, user_id=user_id, signIn_time=currenttime,
+                                      signIn_status=1)
+        db.add(db_sign)
+        db.commit()
+        db.refresh(db_sign)
+        return 1
+    else:
+        db_sign = models.signInRecord(check_in_id=db_class.check_in_id, user_id=user_id, signIn_time=currenttime,
+                                      signIn_status=0)
+        db.add(db_sign)
+        db.commit()
+        db.refresh(db_sign)
+        return 0
+
+
+def subSign(check_id: str, student_id: str, db: Session) -> int:
+    db_signcord = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_id).first()
+    if db_signcord.signIn_status == 1:
+        return 2
+    elif db_signcord.signIn_status == 0:
+        db_sign = models.signInRecord(check_in_id=db_signcord.check_in_id, student_id_id=student_id, signIn_status=2)
+        db.add(db_sign)
+        db.commit()
+        db.refresh(db_sign)
+        return 1
+    else:
+        return 0
