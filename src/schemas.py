@@ -24,20 +24,20 @@ class User(UserBase):
 
 
 class ClassCreate(ClassBase):
-    creator_id: str
+    id: int
     name: str
     joinCode: str
     stuNum: int
 
 
 class ClassJoin(BaseModel):
-    id: str
+    id: int
     joinCode: str
 
 
 class sign(BaseModel):
-    user_id: str
-    class_id: str
+    id: int
+    class_id: int
     starttime: datetime
     endtime: datetime
 
