@@ -35,8 +35,13 @@ def getid(code: str, db: Session = Depends(get_db)):
         "grant_type": "authorization_code",
     }
     # 访问微信api，获取openid(用户唯一标识)--登录凭证校验
-    data = requests.get(wxurl, params=params).json()
+    # wxurl = f"{wxurl}?appid={wxappid}&secret={wxsecret}&js_code={code}&grant_type=authorization_code"
+    # data = requests.get(wxurl, params=params).json()
+    data = {
+        "openid": "Test"
+    }
     print(data)
+    
     if "openid" not in data:
         resp = responses.JSONResponse(content=data)
         print("no openid")
@@ -47,14 +52,12 @@ def getid(code: str, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_openid(db, openid)
     if not db_user:
         db_user = crud.create_user(db=db, openid=openid)
-
-    resp = responses.JSONResponse(content={"id": db_user.id})
-    resp.set_cookie(key="openid", value=openid)
+    resp = responses.JSONResponse(content={"token": db_user.open_id})
     return resp
 
 @app.get("/test")
 def test():
-    return {"test": "测试成功!"}
+    return {"test": "服务器连接正常!"}
 
 
 if __name__ == "__main__":
