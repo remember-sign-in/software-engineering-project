@@ -77,16 +77,25 @@ async def getMyClass(id: str, db: Session = Depends(get_db)):
 @app.get("/home/joinList/{id}")
 async def getJoinClass(id: str, db: Session = Depends(get_db)):
     db_joinclass = crud.get_join_class(db, id)
-    if not db_joinclass: return responses.JSONResponse(content={"items": "null"})
+    if not db_joinclass:
+        return responses.JSONResponse(content={"items": "null"})
     return responses.JSONResponse(content={"items": [
         {"index": item.class_id, "joinCode": item.joinCode, "numbers": item.numbers,
          "name": item.class_name, "id": item.user_id}] for item in db_joinclass})
 
 
+@app.put("/class/exitClass/{id}")
+async def exitClass(id: str, class_id: str, db: Session = Depends(get_db)):
+    db_exitclass = crud.exit_class(id, class_id, db)
+    if db_exitclass == -1:
+        return responses.JSONResponse(content={"user_id": id, "result": "本就不在此班级！"})
+    else:
+        return responses.JSONResponse(content={"user_id": id, "result": "成功退出此班级！"})
+
 @app.post("/class/create_class")
-async def createClass(classcreate: schemas.ClassCreate, db: Session = Depends(get_db)):
-    db_myclass = crud.create_class(db, classcreate.creator_id, classcreate.name, classcreate.joinCode,
-                                   classcreate.stuNum)
+async def createClass(creator_id: str, class_name: str, numbers: int, joinCode: int, db: Session = Depends(get_db)):
+    db_myclass = crud.create_class(creator_id, class_name, joinCode,
+                                   numbers, db)
     if not db_myclass:
         return responses.JSONResponse(content={
             "message": [{"班级id": "null", "班级名称": "null", "result": "JoinCode已被其他班级使用"}]})
@@ -98,14 +107,15 @@ async def createClass(classcreate: schemas.ClassCreate, db: Session = Depends(ge
 async def getClassLsit(id: str, db: Session = Depends(get_db)):
     # id 为class_id
     db_user = crud.get_class_list(db, id)
-    if not db_user: return responses.JSONResponse(content={"items": "null"})
+    if not db_user:
+        return responses.JSONResponse(content={"items": "null"})
     return responses.JSONResponse(
         content={[{"name": item.name, "gov_class": item.admin_class, "id": item.user_id}] for item in db_user})
 
 
 @app.post("/class/joinClass")
-async def joinClass(classjoin: schemas.ClassJoin, db: Session = Depends(get_db)):
-    flag = crud.join_class(db, classjoin.id, classjoin.joinCode)
+async def joinClass(student_id: str, joinCode: str, db: Session = Depends(get_db)):
+    flag = crud.join_class(student_id, joinCode, db)
     if flag == 0:
         return responses.JSONResponse(content={"info": "加入班级失败"})
     elif flag == 1:
@@ -121,9 +131,9 @@ async def deleteClass(class_id: str, db: Session = Depends(get_db)):
 
 
 @app.post("/user/startSign")
-async def start_sign(user_id: str, class_id: str, db: Session = Depends(get_db)):
-    current_time = datetime.now()
-    flag = crud.StartSign(db, user_id, class_id, current_time)
+async def start_sign(user_id: str, class_id: str, starttime: datetime, endtime: datetime,
+                     db: Session = Depends(get_db)):
+    flag = crud.StartSign(db, user_id, class_id, starttime, endtime)
     if flag == 1:
         return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "发起签到成功！"}]})
     else:

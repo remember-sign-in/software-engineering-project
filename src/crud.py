@@ -30,17 +30,25 @@ def get_my_class(db: Session, user_id: str) -> models.MyClass:
 # 查询用户加入的班级
 def get_join_class(db: Session, user_id: str) -> models.MyClass:
     db_joinclass_id = db.query(models.JoinClass).filter(models.JoinClass.user_id == user_id).all()
-    if not db_joinclass_id: return None
+    if not db_joinclass_id:
+        return None
     class_ids = [str(join_class.class_id) for join_class in db_joinclass_id]
     return db.query(models.MyClass).filter(models.MyClass.class_id.in_(class_ids)).all()
 
-
+def exit_class(user_id:str,class_id:str,db:Session)->int:
+    db_exitclass=db.query(models.JoinClass).filter(models.JoinClass.student_id==user_id,models.JoinClass.class_id==class_id).first()
+    if db_exitclass:
+        db.delete(db_exitclass)
+        db.commit()
+        return 1
+    else:
+        return -1
 # 创建新班级
-def create_class(db: Session, creator_id: str, name: str, joinCode: str, stuNum: int) -> models.MyClass:
+def create_class(creator_id: str, name: str, joinCode: str, stuNum: int, db: Session) -> models.MyClass:
     db_myclass = db.query(models.MyClass).filter(models.MyClass.joinCode == joinCode).first()
     if db_myclass:
         return None
-    db_myclass = models.MyClass(user_id=creator_id, class_name=name, numbers=stuNum, joinCode=joinCode)
+    db_myclass = models.MyClass(creator_id=creator_id, class_name=name, numbers=stuNum, joinCode=joinCode)
     db.add(db_myclass)
     db.commit()
     db.refresh(db_myclass)
@@ -57,13 +65,13 @@ def get_class_list(db: Session, id: str) -> List[models.User] | None:
 
 
 # 加入班级
-def join_class(db: Session, id: str, joinCode: str) -> int:
+def join_class(student_id: str, joinCode: str, db: Session) -> int:
     db_myclass = db.query(models.MyClass).filter(models.MyClass.joinCode == joinCode).first()
     if not db_myclass:
         return 0
     if not db.query(models.JoinClass).filter(
-            models.JoinClass.user_id == id and models.JoinClass.class_id == db_myclass.class_id).first():
-        db_joinclass = models.JoinClass(student_id=id, class_id=db_myclass.class_id)
+            models.JoinClass.student_id == id and models.JoinClass.class_id == db_myclass.class_id).first():
+        db_joinclass = models.JoinClass(student_id=student_id, class_id=db_myclass.class_id)
         db.add(db_joinclass)
         db.commit()
         db.refresh(db_joinclass)
@@ -86,12 +94,12 @@ def delete_class(db: Session, class_id: str) -> int:
     return 1
 
 
-def StartSign(db: Session, user_id: str, class_id: str, current_time: DateTime) -> int:
+def StartSign(db: Session, user_id: str, class_id: str, starttime: DateTime, endtime: DateTime) -> int:
     db_class = db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first()
     if not db_class:
         return 0
     db_checkIn = models.checkInRecord(user_id=user_id, class_id=class_id,
-                                      start_time=current_time)
+                                      start_time=starttime, end_time=endtime)
     db.add(db_checkIn)
     db.commit()
     db.refresh(db_checkIn)
@@ -101,15 +109,18 @@ def StartSign(db: Session, user_id: str, class_id: str, current_time: DateTime) 
 #
 def EndSign(db: Session, user_id: str, class_id: str, datetime: DateTime) -> int:
     db_class = db.query(models.checkInRecord).filter(
-        models.checkInRecord.class_id == class_id and models.checkInRecord.user_id == user_id).first()
+        models.checkInRecord.class_id == class_id, models.checkInRecord.user_id == user_id).first()
     if not db_class:
         return 0
     current_time = datetime.now()
     if current_time > db_class.end_time:
         return 2
-    if current_time < db_class.end_time:
-        db_class.end_time = current_time
-    return 1
+    if current_time <= db_class.end_time:
+        db.bulk_update_mappings(models.checkInRecord,
+                                [{'check_in_id': db_class.check_in_id, 'user_id': user_id, 'class_id': class_id,
+                                  'start_time': db_class.start_time, 'end_time': current_time}])
+
+        return 1
 
 
 def signUp(user_id: str, class_id: str, db: Session, currenttime: DateTime) -> int:

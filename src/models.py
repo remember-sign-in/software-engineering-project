@@ -14,7 +14,7 @@ class User(Base):
 class MyClass(Base):
     __tablename__ = "MyClass"
     class_id = Column(Integer, primary_key=True, index=True, autoincrement=True, nullable=False)
-    user_id = Column(String(20), index=True, nullable=False)
+    creator_id = Column(String(20), index=True, nullable=False)
     class_name = Column(String(20), index=True, nullable=False)
     numbers = Column(Integer, index=True, nullable=False)
     joinCode = Column(String(20), index=True, nullable=False)
