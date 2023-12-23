@@ -92,6 +92,16 @@ async def exitClass(id: str, class_id: str, db: Session = Depends(get_db)):
     else:
         return responses.JSONResponse(content={"user_id": id, "result": "成功退出此班级！"})
 
+
+@app.put("/class/kickClass/{id}")
+async def kickClass(id: str, class_id: str, db: Session = Depends(get_db)):
+    db_kick_id = crud.kick_class(id, class_id, db)
+    if db_kick_id == -1:
+        return responses.JSONResponse(content={"student_id": id, "result": "本就不在此班级！"})
+    else:
+        return responses.JSONResponse(content={"student_id": id, "result": "成功踢出此班级！"})
+
+
 @app.post("/class/create_class")
 async def createClass(creator_id: str, class_name: str, numbers: int, joinCode: int, db: Session = Depends(get_db)):
     db_myclass = crud.create_class(creator_id, class_name, joinCode,

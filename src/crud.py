@@ -35,14 +35,29 @@ def get_join_class(db: Session, user_id: str) -> models.MyClass:
     class_ids = [str(join_class.class_id) for join_class in db_joinclass_id]
     return db.query(models.MyClass).filter(models.MyClass.class_id.in_(class_ids)).all()
 
-def exit_class(user_id:str,class_id:str,db:Session)->int:
-    db_exitclass=db.query(models.JoinClass).filter(models.JoinClass.student_id==user_id,models.JoinClass.class_id==class_id).first()
+
+def exit_class(user_id: str, class_id: str, db: Session) -> int:
+    db_exitclass = db.query(models.JoinClass).filter(models.JoinClass.student_id == user_id,
+                                                     models.JoinClass.class_id == class_id).first()
     if db_exitclass:
         db.delete(db_exitclass)
         db.commit()
         return 1
     else:
         return -1
+
+
+def kick_class(id: str, class_id: str, db: Session) -> int:
+    db_exitclass = db.query(models.JoinClass).filter(models.JoinClass.student_id == id,
+                                                     models.JoinClass.class_id == class_id).first()
+    if db_exitclass:
+        db.delete(db_exitclass)
+        db.commit()
+        return 1
+    else:
+        return -1
+
+
 # 创建新班级
 def create_class(creator_id: str, name: str, joinCode: str, stuNum: int, db: Session) -> models.MyClass:
     db_myclass = db.query(models.MyClass).filter(models.MyClass.joinCode == joinCode).first()
