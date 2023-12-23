@@ -81,8 +81,7 @@ async def getJoinClass(id: str, db: Session = Depends(get_db)):
         return responses.JSONResponse(content={"items": "null"})
     result = responses.JSONResponse(content={"items": [
         {"index": item.class_id, "joinCode": item.joinCode, "numbers": str(item.numbers),
-         "name": item.class_name, "id": item.creator_id}] for item in db_joinclass})
-    print(result)
+         "name": item.class_name, "id": item.creator_id} for item in db_joinclass]})
     return result
 
 

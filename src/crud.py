@@ -24,7 +24,7 @@ def create_user(db: Session, openid: str) -> models.User:
 
 # 查询用户创建的班级
 def get_my_class(db: Session, user_id: str) -> models.MyClass:
-    return db.query(models.MyClass).filter(models.MyClass.user_id == user_id).all()
+    return db.query(models.MyClass).filter(models.MyClass.creator_id == user_id).all()
 
 
 # 查询用户加入的班级
