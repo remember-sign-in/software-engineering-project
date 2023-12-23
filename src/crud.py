@@ -126,6 +126,7 @@ def delete_class(db: Session, class_id: int) -> int:
     return 1
 
 
+
 def StartSign(db: Session, id: int, class_id: int, starttime: DateTime, endtime: DateTime) -> int:
     db_class = db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first()
     if not db_class:
@@ -138,7 +139,7 @@ def StartSign(db: Session, id: int, class_id: int, starttime: DateTime, endtime:
     return 1
 
 
-#
+
 def EndSign(db: Session, id: int, class_id: int, datetime: DateTime) -> int:
     db_class = db.query(models.checkInRecord).filter(
         models.checkInRecord.class_id == class_id, models.checkInRecord.id == id).first()
@@ -172,7 +173,6 @@ def signUp(id: str, class_id: int, db: Session, currenttime: DateTime) -> int:
         db.refresh(db_sign)
         return 0
 
-
 def subSign(check_id: int, id: int, db: Session) -> int:
     db_signcord = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_id).first()
     if db_signcord.signIn_status == 1:
@@ -186,4 +186,3 @@ def subSign(check_id: int, id: int, db: Session) -> int:
     else:
         return 0
 
-# def post_regist(username:str,password:str,db:Session)->int:

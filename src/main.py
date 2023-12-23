@@ -92,6 +92,7 @@ async def searchList(class_name: str, db: Session = Depends(get_db)):
         return responses.JSONResponse(content={"items": "null"})
     result = responses.JSONResponse(content={"items": [
         {"index": item.class_id, "name": item.class_name, "id": item.id} for item in db_searchclass]})
+         "name": item.class_name, "id": item.creator_id}] for item in db_joinclass})
     return result
 
 
@@ -211,6 +212,7 @@ async def login(username: str, password: str, db: Session = Depends(get_db)) -> 
         return responses.JSONResponse(content={"message": "登录成功！"})
     else:
         return responses.JSONResponse(content={"message": "登录失败！"})
+
 
 
 if __name__ == "__main__":
