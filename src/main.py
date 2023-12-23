@@ -41,8 +41,10 @@ def getid(code: str, db: Session = Depends(get_db)):
         "grant_type": "authorization_code",
     }
     # 访问微信api，获取openid(用户唯一标识)--登录凭证校验
+    # wxurl = f"{wxurl}?appid={wxappid}&secret={wxsecret}&js_code={code}&grant_type=authorization_code"
     data = requests.get(wxurl, params=params).json()
     print(data)
+
     if "openid" not in data:
         resp = responses.JSONResponse(content=data)
         print("no openid")
@@ -53,15 +55,13 @@ def getid(code: str, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_openid(db, openid)
     if not db_user:
         db_user = crud.create_user(db=db, openid=openid)
-
-    resp = responses.JSONResponse(content={"id": db_user.id})
-    resp.set_cookie(key="openid", value=openid)
+    resp = responses.JSONResponse(content={"token": db_user.open_id, "id": db_user.id})
     return resp
 
 
 @app.get("/test")
 def test():
-    return {"msg": "hello worlddddddd!!!!"}
+    return {"test": "服务器连接正常!"}
 
 
 @app.get("/home/createList/{id}")
@@ -134,6 +134,7 @@ async def joinClass(student_id: str, joinCode: str, db: Session = Depends(get_db
         return responses.JSONResponse(content={"info": "加入班级成功"})
     else:
         return responses.JSONResponse(content={"info": "已经加入过此班级"})
+
 
 
 @app.delete("/class/deleteClass/{class_id}")

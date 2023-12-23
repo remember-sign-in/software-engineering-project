@@ -12,4 +12,4 @@ SQLALCHEMY_DATABASE_URL = f"{type}://{username}:{password}@{ipaddrsss}:{port}/{s
 
 wxurl = "https://api.weixin.qq.com/sns/jscode2session"
 wxappid = "wxe16b90d0fae6e5e9"
-wxsecret = "c4824ebe59357e31272513763ed7d5f8"
+wxsecret = "d47821cc3b9abda9c7c7ba7668d0ca2c"

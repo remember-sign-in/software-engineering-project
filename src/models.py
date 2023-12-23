@@ -4,11 +4,13 @@ from sqlalchemy import Column, String, Integer, DateTime, func
 
 
 class User(Base):
-    __tablename__ = "User"
-    user_id = Column(Integer, primary_key=True, index=True, autoincrement=True, nullable=False)
-    open_id = Column(String(40), index=True, nullable=False)
-    name = Column(String(15), index=True, nullable=False)
-    admin_class = Column(String(15), index=True, nullable=False)
+    __tablename__ = "user"
+    id = Column(
+        Integer, primary_key=True, index=True, autoincrement=True, nullable=False
+    )
+    open_id = Column(String(40), nullable=False)
+    name = Column(String(15), nullable=True)
+
 
 
 class MyClass(Base):
