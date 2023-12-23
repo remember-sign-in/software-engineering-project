@@ -7,6 +7,7 @@ port = 3306
 schema = "sztu_jdqd"
 
 
+
 SQLALCHEMY_DATABASE_URL = f"{type}://{username}:{password}@{ipaddrsss}:{port}/{schema}"
 
 wxurl = "https://api.weixin.qq.com/sns/jscode2session"
