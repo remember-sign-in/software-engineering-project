@@ -36,8 +36,10 @@ def getid(code: str, db: Session = Depends(get_db)):
         "grant_type": "authorization_code",
     }
     # 访问微信api，获取openid(用户唯一标识)--登录凭证校验
+    # wxurl = f"{wxurl}?appid={wxappid}&secret={wxsecret}&js_code={code}&grant_type=authorization_code"
     data = requests.get(wxurl, params=params).json()
     print(data)
+    
     if "openid" not in data:
         resp = responses.JSONResponse(content=data)
         print("no openid")
@@ -48,15 +50,13 @@ def getid(code: str, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_openid(db, openid)
     if not db_user:
         db_user = crud.create_user(db=db, openid=openid)
-
-    resp = responses.JSONResponse(content={"id": db_user.id})
-    resp.set_cookie(key="openid", value=openid)
+    resp = responses.JSONResponse(content={"token": db_user.open_id})
     return resp
 
 
 @app.get("/test")
 def test():
-    return {"msg": "hello worlddddddd!!!!"}
+    return {"test": "服务器连接正常!"}
 
 
 @app.get("/home/createList/{id}")
@@ -104,10 +104,11 @@ async def joinClass(id: str, joinCode: str, db: Session = Depends(get_db)):
     else:
         return responses.JSONResponse(content={"message": [{"学生id": id, "result": "已经加入过此班级"}]})
 
+
 @app.delete("/class/deleteClass/{class_id}")
 async def deleteClass(class_id: str, db: Session = Depends(get_db)):
     db_state = crud.delete_class(db, class_id)
     return responses.JSONResponse(content={"state": db_state})
 
 if __name__ == "__main__":
-    uvicorn.run(app='main:app', host='0.0.0.0', port=8000, reload=True)
+    uvicorn.run(app='main:app', host='127.0.0.1', port=8000, reload=True)
