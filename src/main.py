@@ -85,6 +85,16 @@ async def getJoinClass(id: str, db: Session = Depends(get_db)):
     return result
 
 
+@app.get("/home/searchList")
+async def searchList(class_name: str, db: Session = Depends(get_db)):
+    db_searchclass = crud.get_search_class(class_name, db)
+    if not db_searchclass:
+        return responses.JSONResponse(content={"items": "null"})
+    result = responses.JSONResponse(content={"items": [
+        {"index": item.class_id, "name": item.class_name, "id": item.creator_id} for item in db_searchclass]})
+    return result
+
+
 @app.put("/class/exitClass/{id}")
 async def exitClass(id: str, class_id: str, db: Session = Depends(get_db)):
     db_exitclass = crud.exit_class(id, class_id, db)
@@ -133,7 +143,6 @@ async def joinClass(student_id: str, joinCode: str, db: Session = Depends(get_db
         return responses.JSONResponse(content={"info": "加入班级成功"})
     else:
         return responses.JSONResponse(content={"info": "已经加入过此班级"})
-
 
 
 @app.delete("/class/deleteClass/{class_id}")

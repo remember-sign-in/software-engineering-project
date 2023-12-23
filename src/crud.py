@@ -26,6 +26,8 @@ def create_user(db: Session, openid: str) -> models.User:
 def get_my_class(db: Session, user_id: str) -> models.MyClass:
     return db.query(models.MyClass).filter(models.MyClass.creator_id == user_id).all()
 
+def get_search_class(class_name,db:Session)->models.MyClass:
+    return db.query(models.MyClass).filter(models.MyClass.class_name==class_name).all()
 
 # 查询用户加入的班级
 def get_join_class(db: Session, user_id: str) -> [models.MyClass]:
