@@ -11,8 +11,6 @@ class User(Base):
     open_id = Column(String(40), nullable=False)
     name = Column(String(15), nullable=True)
 
-
-
 class MyClass(Base):
     __tablename__ = "MyClass"
     class_id = Column(Integer, primary_key=True, index=True, autoincrement=True, nullable=False)
