@@ -28,12 +28,13 @@ def get_my_class(db: Session, user_id: str) -> models.MyClass:
 
 
 # 查询用户加入的班级
-def get_join_class(db: Session, user_id: str) -> models.MyClass:
-    db_joinclass_id = db.query(models.JoinClass).filter(models.JoinClass.user_id == user_id).all()
+def get_join_class(db: Session, user_id: str) -> [models.MyClass]:
+    db_joinclass_id = db.query(models.JoinClass).filter(models.JoinClass.student_id == user_id).all()
     if not db_joinclass_id:
         return None
     class_ids = [str(join_class.class_id) for join_class in db_joinclass_id]
-    return db.query(models.MyClass).filter(models.MyClass.class_id.in_(class_ids)).all()
+    result = db.query(models.MyClass).filter(models.MyClass.class_id.in_(class_ids)).all()
+    return result
 
 
 def exit_class(user_id: str, class_id: str, db: Session) -> int:

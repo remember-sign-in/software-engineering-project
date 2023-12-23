@@ -71,7 +71,7 @@ async def getMyClass(id: str, db: Session = Depends(get_db)):
         return responses.JSONResponse(content={"items": "null"})
     return responses.JSONResponse(content={"items": [
         {"index": item.class_id, "joinCode": item.joinCode, "numbers": item.numbers,
-         "name": item.class_name, "id": item.user_id} for item in db_myclass]})
+         "name": item.class_name, "id": item.creator_id} for item in db_myclass]})
 
 
 @app.get("/home/joinList/{id}")
@@ -79,9 +79,11 @@ async def getJoinClass(id: str, db: Session = Depends(get_db)):
     db_joinclass = crud.get_join_class(db, id)
     if not db_joinclass:
         return responses.JSONResponse(content={"items": "null"})
-    return responses.JSONResponse(content={"items": [
-        {"index": item.class_id, "joinCode": item.joinCode, "numbers": item.numbers,
-         "name": item.class_name, "id": item.user_id}] for item in db_joinclass})
+    result = responses.JSONResponse(content={"items": [
+        {"index": item.class_id, "joinCode": item.joinCode, "numbers": str(item.numbers),
+         "name": item.class_name, "id": item.creator_id}] for item in db_joinclass})
+    print(result)
+    return result
 
 
 @app.put("/class/exitClass/{id}")
@@ -184,4 +186,4 @@ async def sub_sign(check_id: str, student_id: str, db: Session = Depends(get_db)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app='main:app', host='0.0.0.0', port=8000, reload=True)
+    uvicorn.run(app='main:app', host='127.0.0.1', port=8000, reload=True)
