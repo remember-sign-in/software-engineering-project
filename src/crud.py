@@ -197,7 +197,8 @@ def query_class_id(class_id : int, db: Session) -> int:
 # 查询该班级是否存在签到记录，返回record_id列表/null
 def query_record_id(class_id: int, db: Session) -> List[int]:
     record_list = db.query(models.checkInRecord.check_in_id).filter(models.checkInRecord.class_id == class_id).all()
-    return record_list
+    formatted_list = [item[0] for item in record_list]  # 提取元组中的第一个元素，构建新的列表
+    return formatted_list
 
 # 查询record_id对应的学生签到情况
 def sign_in_status(status_code):
@@ -222,7 +223,7 @@ def query_record_message(record_list :[], db: Session) -> List[Dict[str,Any]]:
             {
                 **user_data,
                 "status": sign_in_status(item.signIn_status),
-                "check_in_id": str(item.check_in_id),
+                "id": str(item.check_in_id),
             }
         )
     return result
