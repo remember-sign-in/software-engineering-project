@@ -131,7 +131,7 @@ async def getClassLsit(id: int, db: Session = Depends(get_db)):
     if not db_user:
         return responses.JSONResponse(content={"items": "null"})
     return responses.JSONResponse(
-        content={[{"name": item.name, "gov_class": item.admin_class, "id": item.id}] for item in db_user})
+        content={[{"name": item.name, "gov_class": item.admin_class, "id": item.id} for item in db_user]})
 
 
 @app.post("/class/joinClass")
@@ -212,6 +212,23 @@ async def login(username: str, password: str, db: Session = Depends(get_db)) -> 
     else:
         return responses.JSONResponse(content={"message": "登录失败！"})
 
+@app.get("/record/list/{id}")
+async def get_recordlist(id: int, db: Session = Depends(get_db)):
+    '''
+    1.查询“创建班级"表判断class_id是否存在，不存在该班级，返回{}
+    2.查询“发起签到"表根据class_id记录record_id，如果record_id为空，不存在签到活动，返回{}
+    3.查询"签到记录"表根据record_id记录user_id,status,record_id
+    4.查询"用户"表根据user_id记录name,number,gov_class
+    5.最终返回name,number,gov_class,status,record_id
+    '''
+    print(id)
+    if crud.query_class_id(id,db) == 0:
+        return responses.JSONResponse(content={"info":"该班级不存在","name": "","number": "","gov_class": "","status": "","id": ""})
+    db_record_list = crud.query_record_id(id,db)
+    if not db_record_list:
+        return responses.JSONResponse(content={"info":"该班级还未存在签到记录","name": "","number": "","gov_class": "","status": "","id": ""})
+    list = crud.query_record_message(db_record_list,db)
+    return responses.JSONResponse(content=[item for item in list])
 
 
 if __name__ == "__main__":

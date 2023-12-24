@@ -13,6 +13,7 @@ class User(Base):
         name (str, optional): 用户姓名
         admin_class (str, optional): 行政班级
         username (str): 账号
+        number (str): 学号
         password (str): 密码
     """
 
@@ -24,6 +25,7 @@ class User(Base):
     name = Column(String(15), nullable=True)
     admin_class = Column(String(15), nullable=True)
     username = Column(String(10), nullable=False)
+    number = Column(String(30), nullable=True)
     password = Column(String(10), nullable=False)
 
 
