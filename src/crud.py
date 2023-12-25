@@ -15,16 +15,12 @@ def get_user_by_openid(db: Session, openid: str) -> models.User:
 
 
 # 创建用户
-def create_user(open_id: str, name: str, admin_class: str, username: str, password: str, db: Session) -> models.User:
-    db_flag = db.query(models.User).filter(models.User.username == open_id)
-    if db_flag is None:
-        db_user = models.User(open_id=open_id, name=name, admin_class=admin_class, username=username, password=password)
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-    else:
-        return None
+def create_user(db: Session, openid: str) -> models.User:
+    db_user = models.User(open_id=openid)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 
 def login_user(username: str, password: str, db: Session):
