@@ -1,18 +1,19 @@
 from datetime import datetime
-
+import json
 import requests
 import uvicorn
 from fastapi import Cookie, Depends, FastAPI, responses
 from sqlalchemy import DateTime
-
+from requests.exceptions import ConnectTimeout
+from pydantic import BaseModel
 import crud, models, schemas
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
-from data.data import wxappid, wxsecret, wxurl
-
+from data.data import wxappid, wxsecret, wxurl, template_id
+from message import get_access_token
 # 在数据库中生成表结构
 
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -230,6 +231,52 @@ async def get_recordlist(id: int, db: Session = Depends(get_db)):
     list = crud.query_record_message(db_record_list,db)
     return responses.JSONResponse(content=[item for item in list])
 
+
+class PushResponse(BaseModel):
+    errcode: int
+    errmsg: str
+
+
+@app.post('/user/msgpush/')
+def send_received_message_to_user(db: Session=Depends(get_db)):
+
+    url = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send'
+
+    params = {
+        'access_token': get_access_token()
+    }
+
+    headers = {
+        'content-type': 'text/plain'
+    }
+
+    data = {
+        'touser': "oqLDB5C0eFW9gFXBljsw53yypJTU",
+        'template_id': template_id,
+        'miniprogram_state': 'developer',
+        'data': {
+            'name1': {
+                'value': "name1"
+            },
+            'time2': {
+                'value': "time2"
+            },
+            'phrase4': {
+                'value': "phrase4"
+            },
+            'thing5': {
+                'value': "thing5"
+            },
+        }
+    }
+    try:
+        response = requests.post(url, params=params, data=json.dumps(data), headers=headers, timeout=5)
+        data = response.json()
+        print(data)
+        pushresponse = PushResponse(errcode=data['errcode'],errmsg=data['errmsg'])
+        return pushresponse
+    except ConnectTimeout:
+        print('微信服务器出了些小问题')
 
 if __name__ == "__main__":
     uvicorn.run(app='main:app', host='127.0.0.1', port=8000, reload=True)
