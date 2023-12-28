@@ -11,9 +11,10 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, engine
 from data.data import wxappid, wxsecret, wxurl, template_id
 from message import get_access_token
+
 # 在数据库中生成表结构
 
-# models.Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -154,25 +155,21 @@ async def deleteClass(class_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/user/startSign")
-async def start_sign(id: int, class_id: int, starttime: datetime, endtime: datetime,
-                     db: Session = Depends(get_db)):
-    flag = crud.StartSign(db, id, class_id, starttime, endtime)
+async def start_sign(class_id: int, time: int, db: Session = Depends(get_db)):
+    flag = crud.StartSign(db, class_id, time)
     if flag == 1:
-        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "发起签到成功！"}]})
+        return responses.JSONResponse(content={"message": [{"签到id": flag.check_in_id, "result": "发起签到成功！"}]})
     else:
-        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "发起签到失败！"}]})
+        return responses.JSONResponse(content={"message": [{"result": "发起签到失败！"}]})
 
 
 @app.post("/user/endSign")
-async def end_sign(id: int, class_id: int, db: Session = Depends(get_db)):
-    current_time = datetime.now()
-    flag = crud.EndSign(db, id, class_id, current_time)
+async def end_sign(checkIn_id: int, db: Session = Depends(get_db)):
+    flag = crud.EndSign(db, checkIn_id)
     if flag == 1:
-        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "结束签到成功！"}]})
-    elif flag == 2:
-        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "签到已经结束！"}]})
+        return responses.JSONResponse(content={"message": [{"签到id": checkIn_id, "result": "结束签到成功！"}]})
     else:
-        return responses.JSONResponse(content={"message": [{"班级id": class_id, "result": "结束签到失败！"}]})
+        return responses.JSONResponse(content={"message": [{"签到id": checkIn_id, "result": "结束签到失败！"}]})
 
 
 @app.post("/user/signUp")
@@ -214,6 +211,7 @@ async def login(username: str, password: str, db: Session = Depends(get_db)) -> 
     else:
         return responses.JSONResponse(content={"message": "登录失败！"})
 
+
 @app.get("/record/list/{id}")
 async def get_recordlist(id: int, db: Session = Depends(get_db)):
     '''
@@ -242,8 +240,7 @@ class PushResponse(BaseModel):
 
 
 @app.post('/user/msgpush/')
-def send_received_message_to_user(db: Session=Depends(get_db)):
-
+def send_received_message_to_user(db: Session = Depends(get_db)):
     url = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send'
 
     params = {
@@ -277,10 +274,11 @@ def send_received_message_to_user(db: Session=Depends(get_db)):
         response = requests.post(url, params=params, data=json.dumps(data), headers=headers, timeout=5)
         data = response.json()
         print(data)
-        pushresponse = PushResponse(errcode=data['errcode'],errmsg=data['errmsg'])
+        pushresponse = PushResponse(errcode=data['errcode'], errmsg=data['errmsg'])
         return pushresponse
     except ConnectTimeout:
         print('微信服务器出了些小问题')
+
 
 if __name__ == "__main__":
     uvicorn.run(app='main:app', host='127.0.0.1', port=8000, reload=True)
