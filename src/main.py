@@ -280,5 +280,25 @@ def send_received_message_to_user(db: Session = Depends(get_db)):
         print('微信服务器出了些小问题')
 
 
+@app.get("/user/userInfo/{id}")
+async def getUserInfo(id: int, db: Session = Depends(get_db)):
+    info = crud.getInfo(id, db)
+    if info:
+        return responses.JSONResponse(
+            content={"id": id, "open_id": info.open_id, "name": info.name, "admin_class": info.admin_class})
+    else:
+        return responses.JSONResponse(content={"message": "获取该用户信息失败！"})
+
+
+@app.post("/user/editInfo")
+async def editInfo(id: int, name: str, db: Session = Depends(get_db)):
+    info = crud.editInfo(id, name, db)
+    if info:
+        return responses.JSONResponse(
+            content={"id": id, "name": name})
+    else:
+        return responses.JSONResponse(content={"message": "修改该用户信息失败！"})
+
+
 if __name__ == "__main__":
     uvicorn.run(app='main:app', host='127.0.0.1', port=8000, reload=True)
