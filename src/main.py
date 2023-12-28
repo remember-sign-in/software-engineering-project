@@ -157,7 +157,7 @@ async def deleteClass(class_id: int, db: Session = Depends(get_db)):
 @app.post("/user/startSign")
 async def start_sign(class_id: int, time: int, db: Session = Depends(get_db)):
     flag = crud.StartSign(db, class_id, time)
-    if flag == 1:
+    if flag:
         return responses.JSONResponse(content={"message": [{"签到id": flag.check_in_id, "result": "发起签到成功！"}]})
     else:
         return responses.JSONResponse(content={"message": [{"result": "发起签到失败！"}]})

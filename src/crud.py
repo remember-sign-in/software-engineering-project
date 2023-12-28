@@ -136,9 +136,17 @@ def StartSign(db: Session, class_id: int, time: int) -> models.checkInRecord:
     randomNumber = ''.join(choice(numbers) for _ in range(4))
     db_checkIn = models.checkInRecord(id=db_class.id, class_id=class_id,
                                       start_time=start_time, end_time=end_time, signIn_number=randomNumber)
+
     db.add(db_checkIn)
     db.commit()
     db.refresh(db_checkIn)
+    query_result = db.query(models.JoinClass).filter(models.JoinClass.class_id == class_id).all()
+    id_result = [item.id for item in query_result]
+    for id in id_result:
+        db_result = models.signInRecord(check_in_id=db_checkIn.check_in_id, id=id, signIn_status=0)
+        db.add(db_result)
+        db.commit()
+        db.refresh(db_result)
     return db_checkIn
 
 

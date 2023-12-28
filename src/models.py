@@ -73,7 +73,7 @@ class signInRecord(Base):
     __tablename__ = "signInRecord"
     check_in_id = Column(Integer, primary_key=True, nullable=False)
     id = Column(Integer, primary_key=True, nullable=False)
-    signIn_time = Column(DateTime, nullable=False)
+    signIn_time = Column(DateTime, nullable=True)
     signIn_status = Column(Integer, nullable=False)
 
 
