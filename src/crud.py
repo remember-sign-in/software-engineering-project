@@ -126,6 +126,7 @@ def delete_class(db: Session, class_id: int) -> int:
     return 1
 
 
+
 def StartSign(db: Session, id: int, class_id: int, starttime: DateTime, endtime: DateTime) -> int:
     db_class = db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first()
     if not db_class:
@@ -136,6 +137,7 @@ def StartSign(db: Session, id: int, class_id: int, starttime: DateTime, endtime:
     db.commit()
     db.refresh(db_checkIn)
     return 1
+
 
 
 def EndSign(db: Session, id: int, class_id: int, datetime: DateTime) -> int:
@@ -171,7 +173,6 @@ def signUp(id: str, class_id: int, db: Session, currenttime: DateTime) -> int:
         db.refresh(db_sign)
         return 0
 
-
 def subSign(check_id: int, id: int, db: Session) -> int:
     db_signcord = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_id).first()
     if db_signcord.signIn_status == 1:
@@ -199,7 +200,6 @@ def query_record_id(class_id: int, db: Session) -> List[int]:
     formatted_list = [item[0] for item in record_list]  # 提取元组中的第一个元素，构建新的列表
     return formatted_list
 
-
 # 查询record_id对应的学生签到情况
 def sign_in_status(status_code):
     if status_code == 2:
@@ -218,6 +218,7 @@ def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
     user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
     user_data_dict = {user.id: {"name": user.name, "number": str(user.id), "gov_class": user.admin_class} for user in
                       user_result}
+
     result = []
     for item in query_result:
         user_data = user_data_dict.get(item.id, {})
@@ -229,3 +230,4 @@ def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
             }
         )
     return result
+

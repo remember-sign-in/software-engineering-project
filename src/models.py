@@ -96,3 +96,4 @@ class checkInRecord(Base):
     class_id = Column(Integer, nullable=False)
     start_time = Column(DateTime, nullable=False, default=func.now())
     end_time = Column(DateTime, nullable=False, default=func.now())
+

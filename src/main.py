@@ -213,7 +213,6 @@ async def login(username: str, password: str, db: Session = Depends(get_db)) -> 
     else:
         return responses.JSONResponse(content={"message": "登录失败！"})
 
-
 @app.get("/record/list/{id}")
 async def get_recordlist(id: int, db: Session = Depends(get_db)):
     '''
