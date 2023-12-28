@@ -24,9 +24,6 @@ class User(Base):
     open_id = Column(String(40), nullable=False)
     name = Column(String(15), nullable=True)
     admin_class = Column(String(15), nullable=True)
-    username = Column(String(10), nullable=False)
-    number = Column(String(30), nullable=True)
-    password = Column(String(10), nullable=False)
 
 
 class MyClass(Base):
