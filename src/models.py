@@ -1,4 +1,3 @@
-
 from database import Base
 from sqlalchemy import Column, String, Integer, DateTime, func
 
@@ -74,8 +73,9 @@ class signInRecord(Base):
     __tablename__ = "signInRecord"
     check_in_id = Column(Integer, primary_key=True, nullable=False)
     id = Column(Integer, primary_key=True, nullable=False)
-    signIn_time = Column(DateTime, nullable=False)
+    signIn_time = Column(DateTime, nullable=True)
     signIn_status = Column(Integer, nullable=False)
+
 
 
 class checkInRecord(Base):
@@ -96,4 +96,4 @@ class checkInRecord(Base):
     class_id = Column(Integer, nullable=False)
     start_time = Column(DateTime, nullable=False, default=func.now())
     end_time = Column(DateTime, nullable=False, default=func.now())
-
+    signIn_number = Column(String(20), nullable=False)

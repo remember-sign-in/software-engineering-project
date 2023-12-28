@@ -36,8 +36,7 @@ class ClassJoin(BaseModel):
 
 
 class sign(BaseModel):
-    id: int
-    class_id: int
+    checkIn_id: int
     starttime: datetime
     endtime: datetime
 

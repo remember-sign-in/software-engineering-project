@@ -1,6 +1,6 @@
-import datetime
+from datetime import datetime, timedelta
 import random, string
-
+from random import choice
 import responses
 from typing import List, Dict, Any
 
@@ -126,34 +126,41 @@ def delete_class(db: Session, class_id: int) -> int:
     return 1
 
 
-
-def StartSign(db: Session, id: int, class_id: int, starttime: DateTime, endtime: DateTime) -> int:
+def StartSign(db: Session, class_id: int, time: int) -> models.checkInRecord:
     db_class = db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first()
     if not db_class:
-        return 0
-    db_checkIn = models.checkInRecord(id=id, class_id=class_id,
-                                      start_time=starttime, end_time=endtime)
+        return None
+    start_time = datetime.now()
+    end_time = start_time + timedelta(minutes=time)
+    numbers = string.digits
+    randomNumber = ''.join(choice(numbers) for _ in range(4))
+    db_checkIn = models.checkInRecord(id=db_class.id, class_id=class_id,
+                                      start_time=start_time, end_time=end_time, signIn_number=randomNumber)
+
     db.add(db_checkIn)
     db.commit()
     db.refresh(db_checkIn)
-    return 1
+    query_result = db.query(models.JoinClass).filter(models.JoinClass.class_id == class_id).all()
+    id_result = [item.id for item in query_result]
+    for id in id_result:
+        db_result = models.signInRecord(check_in_id=db_checkIn.check_in_id, id=id, signIn_status=0)
+        db.add(db_result)
+        db.commit()
+        db.refresh(db_result)
+    return db_checkIn
 
 
-
-def EndSign(db: Session, id: int, class_id: int, datetime: DateTime) -> int:
-    db_class = db.query(models.checkInRecord).filter(
-        models.checkInRecord.class_id == class_id, models.checkInRecord.id == id).first()
+def EndSign(db: Session, checkIn_id: int) -> int:
+    db_class = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == checkIn_id).first()
     if not db_class:
         return 0
     current_time = datetime.now()
     if current_time > db_class.end_time:
-        return 2
-    if current_time <= db_class.end_time:
-        db.bulk_update_mappings(models.checkInRecord,
-                                [{'check_in_id': db_class.check_in_id, 'id': id, 'class_id': class_id,
-                                  'start_time': db_class.start_time, 'end_time': current_time}])
-
-        return 1
+        return -1
+    db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == checkIn_id).update(
+        {'end_time': current_time})
+    db.commit()
+    return 1
 
 
 def signUp(id: str, class_id: int, db: Session, currenttime: DateTime) -> int:
@@ -172,6 +179,7 @@ def signUp(id: str, class_id: int, db: Session, currenttime: DateTime) -> int:
         db.commit()
         db.refresh(db_sign)
         return 0
+
 
 def subSign(check_id: int, id: int, db: Session) -> int:
     db_signcord = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_id).first()
@@ -199,6 +207,7 @@ def query_record_id(class_id: int, db: Session) -> List[int]:
     record_list = db.query(models.checkInRecord.check_in_id).filter(models.checkInRecord.class_id == class_id).all()
     formatted_list = [item[0] for item in record_list]  # 提取元组中的第一个元素，构建新的列表
     return formatted_list
+
 
 # 查询record_id对应的学生签到情况
 def sign_in_status(status_code):
@@ -230,4 +239,3 @@ def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
             }
         )
     return result
-
