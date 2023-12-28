@@ -1,4 +1,6 @@
 import datetime
+import random, string
+
 import responses
 from typing import List, Dict, Any
 
@@ -73,7 +75,8 @@ def kick_class(id: int, class_id: int, db: Session) -> int:
 
 
 # 创建新班级
-def create_class(id: int, name: str, joinCode: str, stuNum: int, db: Session) -> models.MyClass:
+def create_class(id: int, name: str, stuNum: int, db: Session) -> models.MyClass:
+    joinCode = result = ''.join(random.sample(string.ascii_letters + string.digits, 8))
     db_myclass = db.query(models.MyClass).filter(models.MyClass.joinCode == joinCode).first()
     if db_myclass:
         return None
@@ -185,10 +188,11 @@ def subSign(check_id: int, id: int, db: Session) -> int:
 
 
 # 查询该班级是否存在
-def query_class_id(class_id : int, db: Session) -> int:
-    if db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first() :
+def query_class_id(class_id: int, db: Session) -> int:
+    if db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first():
         return 1
     return 0
+
 
 # 查询该班级是否存在签到记录，返回record_id列表/null
 def query_record_id(class_id: int, db: Session) -> List[int]:
@@ -207,11 +211,14 @@ def sign_in_status(status_code):
     else:
         return "未知状态"
 
-def query_record_message(record_list :[], db: Session) -> List[Dict[str,Any]]:
+
+def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
     query_result = db.query(models.signInRecord).filter(models.signInRecord.check_in_id.in_(record_list)).all()
     id_result = [item.id for item in query_result]
     user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
-    user_data_dict = {user.id: {"name": user.name, "number": user.number,"gov_class": user.admin_class} for user in user_result}
+    user_data_dict = {user.id: {"name": user.name, "number": str(user.id), "gov_class": user.admin_class} for user in
+                      user_result}
+
     result = []
     for item in query_result:
         user_data = user_data_dict.get(item.id, {})
