@@ -5,3 +5,5 @@ SQLAlchemy==2.0.23
 uvicorn
 gunicorn==20.1.0
 responses
+pymysql
+
