@@ -1,3 +1,4 @@
+
 from database import Base
 from sqlalchemy import Column, String, Integer, DateTime, func
 
@@ -12,6 +13,7 @@ class User(Base):
         name (str, optional): 用户姓名
         admin_class (str, optional): 行政班级
         username (str): 账号
+        number (str): 学号
         password (str): 密码
     """
 
@@ -22,8 +24,6 @@ class User(Base):
     open_id = Column(String(40), nullable=False)
     name = Column(String(15), nullable=True)
     admin_class = Column(String(15), nullable=True)
-    username = Column(String(10), nullable=False)
-    password = Column(String(10), nullable=False)
 
 
 class MyClass(Base):

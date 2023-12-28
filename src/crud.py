@@ -1,5 +1,8 @@
 import datetime
-from typing import List
+import random, string
+
+import responses
+from typing import List, Dict, Any
 
 from sqlalchemy import DateTime
 
@@ -14,16 +17,12 @@ def get_user_by_openid(db: Session, openid: str) -> models.User:
 
 
 # 创建用户
-def create_user(open_id: str, name: str, admin_class: str, username: str, password: str, db: Session) -> models.User:
-    db_flag = db.query(models.User).filter(models.User.username == open_id)
-    if db_flag is None:
-        db_user = models.User(open_id=open_id, name=name, admin_class=admin_class, username=username, password=password)
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-    else:
-        return None
+def create_user(db: Session, openid: str) -> models.User:
+    db_user = models.User(open_id=openid)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 
 def login_user(username: str, password: str, db: Session):
@@ -76,7 +75,8 @@ def kick_class(id: int, class_id: int, db: Session) -> int:
 
 
 # 创建新班级
-def create_class(id: int, name: str, joinCode: str, stuNum: int, db: Session) -> models.MyClass:
+def create_class(id: int, name: str, stuNum: int, db: Session) -> models.MyClass:
+    joinCode = result = ''.join(random.sample(string.ascii_letters + string.digits, 8))
     db_myclass = db.query(models.MyClass).filter(models.MyClass.joinCode == joinCode).first()
     if db_myclass:
         return None
@@ -138,7 +138,6 @@ def StartSign(db: Session, id: int, class_id: int, starttime: DateTime, endtime:
     return 1
 
 
-#
 def EndSign(db: Session, id: int, class_id: int, datetime: DateTime) -> int:
     db_class = db.query(models.checkInRecord).filter(
         models.checkInRecord.class_id == class_id, models.checkInRecord.id == id).first()
@@ -186,4 +185,47 @@ def subSign(check_id: int, id: int, db: Session) -> int:
     else:
         return 0
 
-# def post_regist(username:str,password:str,db:Session)->int:
+
+# 查询该班级是否存在
+def query_class_id(class_id: int, db: Session) -> int:
+    if db.query(models.MyClass).filter(models.MyClass.class_id == class_id).first():
+        return 1
+    return 0
+
+
+# 查询该班级是否存在签到记录，返回record_id列表/null
+def query_record_id(class_id: int, db: Session) -> List[int]:
+    record_list = db.query(models.checkInRecord.check_in_id).filter(models.checkInRecord.class_id == class_id).all()
+    formatted_list = [item[0] for item in record_list]  # 提取元组中的第一个元素，构建新的列表
+    return formatted_list
+
+
+# 查询record_id对应的学生签到情况
+def sign_in_status(status_code):
+    if status_code == 2:
+        return "已补签"
+    elif status_code == 1:
+        return "已签到"
+    elif status_code == 0:
+        return "缺勤"
+    else:
+        return "未知状态"
+
+
+def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
+    query_result = db.query(models.signInRecord).filter(models.signInRecord.check_in_id.in_(record_list)).all()
+    id_result = [item.id for item in query_result]
+    user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
+    user_data_dict = {user.id: {"name": user.name, "number": str(user.id), "gov_class": user.admin_class} for user in
+                      user_result}
+    result = []
+    for item in query_result:
+        user_data = user_data_dict.get(item.id, {})
+        result.append(
+            {
+                **user_data,
+                "status": sign_in_status(item.signIn_status),
+                "id": str(item.check_in_id),
+            }
+        )
+    return result
