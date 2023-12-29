@@ -221,17 +221,32 @@ async def get_recordlist(class_id: int, db: Session = Depends(get_db)):
     4.查询"用户"表根据user_id记录name,number,gov_class
     5.最终返回name,number,gov_class,status,record_id
     '''
-    print(id)
-    if crud.query_class_id(id, db) == 0:
+    print(class_id)
+    if crud.query_class_id(class_id, db) == 0:
         return responses.JSONResponse(
             content={"info": "该班级不存在", "name": "", "gov_class": "", "status": "", "id": ""})
-    db_record_list = crud.query_record_id(id, db)
+    db_record_list = crud.query_record_id(class_id, db)
     if not db_record_list:
         return responses.JSONResponse(
             content={"info": "该班级还未存在签到记录", "name": "", "gov_class": "", "status": "", "id": ""})
     list = crud.query_record_message(db_record_list, db)
     return responses.JSONResponse(content=[item for item in list])
 
+@app.post("/record/del")
+async def delrecord(user_id:int,checkin_id:int,db:Session = Depends(get_db)):
+    flag = crud.del_record(user_id,checkin_id,db)
+    if flag == 1:
+        return responses.JSONResponse(content={"message": "签到记录删除成功！"})
+    else:
+        return responses.JSONResponse(content={"message": "签到记录不存在，删除失败！"})
+
+
+@app.get("/record/detail")
+async def getRecord(checkin_id:int, db: Session = Depends(get_db)):
+    db_record = crud.get_record(checkin_id,db)
+    if not db_record:
+        return responses.JSONResponse(content={"items": "无签到记录"})
+    return responses.JSONResponse(content=[item for item in db_record])
 
 @app.get("/record/oneRecord{id}")
 async def getOneRecord(id: int, db: Session = Depends(get_db)):

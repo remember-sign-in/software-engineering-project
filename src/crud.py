@@ -186,6 +186,35 @@ def subSign(checkin_id: int, id: int, db: Session) -> int:
     else:
         return 0
 
+# 删除记录
+def del_record(user_id: int, checkin_id: int ,db:Session) -> int:
+    db_record = db.query(models.signInRecord).filter(models.signInRecord.id == user_id , models.signInRecord.check_in_id == checkin_id).first()
+    if db_record:
+        db.delete(db_record)
+        db.commit()
+        return 1
+    return 0
+
+# 获取某次签到记录具体列表
+def get_record( checkin_id: int, db:Session) -> List[models.signInRecord]:
+    db_record = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == checkin_id).all()
+    id_result = [item.id for item in db_record]
+    user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
+    user_data_dict = {user.id: {"name": user.name, "gov_class": user.admin_class} for user in
+                      user_result}
+
+    result = []
+    for item in db_record:
+        user_data = user_data_dict.get(item.id, {})
+        result.append(
+            {
+                **user_data,
+                "status": sign_in_status(item.signIn_status),
+                "time": str(item.signIn_time),
+                "id": str(item.check_in_id),
+            }
+        )
+    return result
 
 # 查询该班级是否存在
 def query_class_id(class_id: int, db: Session) -> int:
@@ -217,7 +246,7 @@ def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
     query_result = db.query(models.signInRecord).filter(models.signInRecord.check_in_id.in_(record_list)).all()
     id_result = [item.id for item in query_result]
     user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
-    user_data_dict = {user.id: {"name": user.name, "number": str(user.id), "gov_class": user.admin_class} for user in
+    user_data_dict = {user.id: {"name": user.name,  "gov_class": user.admin_class} for user in
                       user_result}
 
     result = []
