@@ -163,37 +163,58 @@ def EndSign(db: Session, checkIn_id: int) -> int:
     return 1
 
 
-def signUp(id: str, class_id: int, db: Session, currenttime: DateTime) -> int:
-    db_class = db.query(models.checkInRecord).filter(models.checkInRecord.class_id == class_id).first()
-    if db_class.start_time <= currenttime <= db_class.end_time:
-        db_sign = models.signInRecord(check_in_id=db_class.check_in_id, id=id, signIn_time=currenttime,
-                                      signIn_status=1)
-        db.add(db_sign)
+def signUp(id: int, checkin_id: int,  currenttime: DateTime, signIn_number:str,db: Session) -> int:
+    db_class = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == checkin_id).first()
+    # print("签到", db_class.signIn_number)
+    if db_class and db_class.start_time <= currenttime <= db_class.end_time and db_class.signIn_number ==  signIn_number:
+        db.query(models.signInRecord).filter(models.signInRecord.id == id , models.signInRecord.check_in_id == checkin_id).update({models.signInRecord.signIn_time:currenttime,models.signInRecord.signIn_status:1})
         db.commit()
-        db.refresh(db_sign)
         return 1
-    else:
-        db_sign = models.signInRecord(check_in_id=db_class.check_in_id, id=id, signIn_time=currenttime,
-                                      signIn_status=0)
-        db.add(db_sign)
-        db.commit()
-        db.refresh(db_sign)
+    return 0
+
+def subSign(checkin_id: int, id: int, db: Session) -> int:
+    db_signcord = db.query(models.signInRecord).filter(models.signInRecord.id == id, models.signInRecord.check_in_id == checkin_id).first()
+    if not db_signcord:
         return 0
-
-
-def subSign(check_id: int, id: int, db: Session) -> int:
-    db_signcord = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_id).first()
-    if db_signcord.signIn_status == 1:
+    print("签到",db_signcord.check_in_id,  db_signcord.signIn_status)
+    if db_signcord.signIn_status == 1 or db_signcord.signIn_status == 2:
         return 2
     elif db_signcord.signIn_status == 0:
-        db_sign = models.signInRecord(check_in_id=db_signcord.check_in_id, id=id, signIn_status=2)
-        db.add(db_sign)
+        db.query(models.signInRecord).filter(models.signInRecord.id == id , models.signInRecord.check_in_id == checkin_id).update({models.signInRecord.signIn_status:2})
         db.commit()
-        db.refresh(db_sign)
         return 1
     else:
         return 0
 
+# 删除记录
+def del_record(user_id: int, checkin_id: int ,db:Session) -> int:
+    db_record = db.query(models.signInRecord).filter(models.signInRecord.id == user_id , models.signInRecord.check_in_id == checkin_id).first()
+    if db_record:
+        db.delete(db_record)
+        db.commit()
+        return 1
+    return 0
+
+# 获取某次签到记录具体列表
+def get_record( checkin_id: int, db:Session) -> List[models.signInRecord]:
+    db_record = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == checkin_id).all()
+    id_result = [item.id for item in db_record]
+    user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
+    user_data_dict = {user.id: {"name": user.name, "gov_class": user.admin_class} for user in
+                      user_result}
+
+    result = []
+    for item in db_record:
+        user_data = user_data_dict.get(item.id, {})
+        result.append(
+            {
+                **user_data,
+                "status": sign_in_status(item.signIn_status),
+                "time": str(item.signIn_time),
+                "id": str(item.check_in_id),
+            }
+        )
+    return result
 
 # 查询该班级是否存在
 def query_class_id(class_id: int, db: Session) -> int:
@@ -225,7 +246,7 @@ def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
     query_result = db.query(models.signInRecord).filter(models.signInRecord.check_in_id.in_(record_list)).all()
     id_result = [item.id for item in query_result]
     user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
-    user_data_dict = {user.id: {"name": user.name, "number": str(user.id), "gov_class": user.admin_class} for user in
+    user_data_dict = {user.id: {"name": user.name,  "gov_class": user.admin_class} for user in
                       user_result}
 
     result = []
