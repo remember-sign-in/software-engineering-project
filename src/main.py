@@ -173,9 +173,9 @@ async def end_sign(checkIn_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/user/signUp")
-async def sign_up(id: int, class_id: int, db: Session = Depends(get_db)):
+async def sign_up(id: int, checkin_id: int, signIn_number:str,db: Session = Depends(get_db)):
     current_time = datetime.now()
-    flag = crud.signUp(id, class_id, db, current_time)
+    flag = crud.signUp(id,checkin_id,current_time,signIn_number,db)
     if flag == 1:
         return responses.JSONResponse(content={"message": [{"用户id": id, "result": "签到成功！"}]})
     else:
@@ -183,15 +183,14 @@ async def sign_up(id: int, class_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/user/subSign")
-async def sub_sign(check_id: int, id: int, db: Session = Depends(get_db)):
-    flag = crud.subSign(check_id, id, db)
+async def sub_sign(checkin_id: int, id: int, db: Session = Depends(get_db)):
+    flag = crud.subSign(checkin_id, id, db)
     if flag == 1:
         return responses.JSONResponse(content={"message": [{"用户id": id, "result": "补签成功！"}]})
     elif flag == 2:
         return responses.JSONResponse(content={"message": [{"用户id": id, "result": "已经签到！"}]})
     else:
-        return responses.JSONResponse(content={"message": [{"用户id": id, "result": "补签失败！"}]})
-
+        return responses.JSONResponse(content={"message": [{"用户id": id, "result": "不存在该用户！"}]})
 
 @app.post("/user/regist")
 async def regist(open_id: str, name: str, admin_class: str, username: str, password: str,

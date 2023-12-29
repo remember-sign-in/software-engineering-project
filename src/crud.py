@@ -163,33 +163,25 @@ def EndSign(db: Session, checkIn_id: int) -> int:
     return 1
 
 
-def signUp(id: str, class_id: int, db: Session, currenttime: DateTime) -> int:
-    db_class = db.query(models.checkInRecord).filter(models.checkInRecord.class_id == class_id).first()
-    if db_class.start_time <= currenttime <= db_class.end_time:
-        db_sign = models.signInRecord(check_in_id=db_class.check_in_id, id=id, signIn_time=currenttime,
-                                      signIn_status=1)
-        db.add(db_sign)
+def signUp(id: int, checkin_id: int,  currenttime: DateTime, signIn_number:str,db: Session) -> int:
+    db_class = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == checkin_id).first()
+    # print("签到", db_class.signIn_number)
+    if db_class and db_class.start_time <= currenttime <= db_class.end_time and db_class.signIn_number ==  signIn_number:
+        db.query(models.signInRecord).filter(models.signInRecord.id == id , models.signInRecord.check_in_id == checkin_id).update({models.signInRecord.signIn_time:currenttime,models.signInRecord.signIn_status:1})
         db.commit()
-        db.refresh(db_sign)
         return 1
-    else:
-        db_sign = models.signInRecord(check_in_id=db_class.check_in_id, id=id, signIn_time=currenttime,
-                                      signIn_status=0)
-        db.add(db_sign)
-        db.commit()
-        db.refresh(db_sign)
+    return 0
+
+def subSign(checkin_id: int, id: int, db: Session) -> int:
+    db_signcord = db.query(models.signInRecord).filter(models.signInRecord.id == id, models.signInRecord.check_in_id == checkin_id).first()
+    if not db_signcord:
         return 0
-
-
-def subSign(check_id: int, id: int, db: Session) -> int:
-    db_signcord = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_id).first()
-    if db_signcord.signIn_status == 1:
+    print("签到",db_signcord.check_in_id,  db_signcord.signIn_status)
+    if db_signcord.signIn_status == 1 or db_signcord.signIn_status == 2:
         return 2
     elif db_signcord.signIn_status == 0:
-        db_sign = models.signInRecord(check_in_id=db_signcord.check_in_id, id=id, signIn_status=2)
-        db.add(db_sign)
+        db.query(models.signInRecord).filter(models.signInRecord.id == id , models.signInRecord.check_in_id == checkin_id).update({models.signInRecord.signIn_status:2})
         db.commit()
-        db.refresh(db_sign)
         return 1
     else:
         return 0
