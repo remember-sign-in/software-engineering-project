@@ -212,8 +212,9 @@ async def login(username: str, password: str, db: Session = Depends(get_db)) -> 
         return responses.JSONResponse(content={"message": "登录失败！"})
 
 
-@app.get("/record/list/{id}")
-async def get_recordlist(id: int, db: Session = Depends(get_db)):
+@app.get("/record/list/{class_id}")
+async def get_recordlist(class_id: int, db: Session = Depends(get_db)):
+
     '''
     1.查询“创建班级"表判断class_id是否存在，不存在该班级，返回{}
     2.查询“发起签到"表根据class_id记录record_id，如果record_id为空，不存在签到活动，返回{}
@@ -224,16 +225,43 @@ async def get_recordlist(id: int, db: Session = Depends(get_db)):
     print(id)
     if crud.query_class_id(id, db) == 0:
         return responses.JSONResponse(
-            content={"info": "该班级不存在", "name": "", "number": "", "gov_class": "", "status": "", "id": ""})
+            content={"info": "该班级不存在", "name": "", "gov_class": "", "status": "", "id": ""})
     db_record_list = crud.query_record_id(id, db)
     if not db_record_list:
         return responses.JSONResponse(
-            content={"info": "该班级还未存在签到记录", "name": "", "number": "", "gov_class": "", "status": "",
-                     "id": ""})
+            content={"info": "该班级还未存在签到记录", "name": "", "gov_class": "", "status": "", "id": ""})
     list = crud.query_record_message(db_record_list, db)
     return responses.JSONResponse(content=[item for item in list])
 
 
+@app.get("/record/oneRecord{id}")
+async def getOneRecord(id: int, db: Session = Depends(get_db)):
+    recordList = crud.get_one_record(id, db)
+    if recordList:
+        return responses.JSONResponse(content={"items": [
+            {"check_in_id": record.check_in_id, "signIn_time": str(record.signIn_time),
+             "signIn_status": record.signIn_status} for record in recordList]})
+    else:
+        return responses.JSONResponse(content={"message": "未找到该用户的签到记录"})
+
+@app.get("/record/unsignList{check_in_id}")
+async def getunsignList(check_in_id: int, db: Session = Depends(get_db)):
+    unsignList = crud.get_unsignList(check_in_id, db)
+    if unsignList:
+        return responses.JSONResponse(content={"items": [
+            {"id": record.id, "signIn_time": str(record.signIn_time),
+             "signIn_status": record.signIn_status} for record in unsignList]})
+    else:
+        return responses.JSONResponse(content={"message": "未找到此签到id或者全已签到"})
+@app.get("/record/signList{check_in_id}")
+async def getsignList(check_in_id: int, db: Session = Depends(get_db)):
+    recordList = crud.get_signList(check_in_id, db)
+    if recordList:
+        return responses.JSONResponse(content={"items": [
+            {"id": record.id, "signIn_time": str(record.signIn_time),
+             "signIn_status": record.signIn_status} for record in recordList]})
+    else:
+        return responses.JSONResponse(content={"message": "未找到此签到id或者全未签到"})
 class PushResponse(BaseModel):
     errcode: int
     errmsg: str
@@ -280,5 +308,24 @@ def send_received_message_to_user(db: Session = Depends(get_db)):
         print('微信服务器出了些小问题')
 
 
+@app.get("/user/userInfo/{id}")
+async def getUserInfo(id: int, db: Session = Depends(get_db)):
+    info = crud.getInfo(id, db)
+    if info:
+        return responses.JSONResponse(
+            content={"id": id, "open_id": info.open_id, "name": info.name, "admin_class": info.admin_class})
+    else:
+        return responses.JSONResponse(content={"message": "获取该用户信息失败！"})
+
+
+@app.post("/user/editInfo")
+async def editInfo(id: int, name: str, db: Session = Depends(get_db)):
+    info = crud.editInfo(id, name, db)
+    if info:
+        return responses.JSONResponse(
+            content={"id": id, "name": name})
+    else:
+        return responses.JSONResponse(content={"message": "修改该用户信息失败！"})
+      
 if __name__ == "__main__":
     uvicorn.run(app='main:app', host='127.0.0.1', port=8000, reload=True)

@@ -239,3 +239,31 @@ def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
             }
         )
     return result
+
+
+def getInfo(id: int, db: Session):
+    userinfo = db.query(models.User).filter(models.User.id == id).first()
+    return userinfo
+
+
+def editInfo(id: int, name: str, db: Session):
+    flag = db.query(models.User).filter(models.User.id == id).update({'name': name})
+    return flag
+
+
+def get_one_record(id: int, db: Session) -> List[Dict[str, Any]]:
+    recordList = db.query(models.signInRecord).filter(models.signInRecord.id == id).all()
+    return recordList
+
+
+def get_unsignList(check_in_id: int, db: Session):
+    unsignList = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_in_id,
+                                                      models.signInRecord.signIn_status == 0).all()
+    return unsignList
+
+
+def get_signList(check_in_id: int, db: Session):
+    signList = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_in_id,
+                                                    models.signInRecord.signIn_status == 1).all()
+    return signList
+
