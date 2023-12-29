@@ -214,6 +214,7 @@ async def login(username: str, password: str, db: Session = Depends(get_db)) -> 
 
 @app.get("/record/list/{class_id}")
 async def get_recordlist(class_id: int, db: Session = Depends(get_db)):
+
     '''
     1.查询“创建班级"表判断class_id是否存在，不存在该班级，返回{}
     2.查询“发起签到"表根据class_id记录record_id，如果record_id为空，不存在签到活动，返回{}
@@ -325,7 +326,6 @@ async def editInfo(id: int, name: str, db: Session = Depends(get_db)):
             content={"id": id, "name": name})
     else:
         return responses.JSONResponse(content={"message": "修改该用户信息失败！"})
-
-
+      
 if __name__ == "__main__":
     uvicorn.run(app='main:app', host='127.0.0.1', port=8000, reload=True)

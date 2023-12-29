@@ -266,3 +266,4 @@ def get_signList(check_in_id: int, db: Session):
     signList = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_in_id,
                                                     models.signInRecord.signIn_status == 1).all()
     return signList
+
