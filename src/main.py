@@ -121,10 +121,10 @@ async def createClass(id: int, class_name: str, numbers: int, db: Session = Depe
                                    numbers, db)
     if not db_myclass:
         return responses.JSONResponse(content={
-            "message": [{"class_id": "null", "class_name": "null", "result":"班级名重复"}]})
+            "message": {"class_id": "null", "class_name": "null", "result":"班级名重复"}})
     return responses.JSONResponse(content={
-        "message": [{"class_id": db_myclass.class_id, "class_name": db_myclass.class_name, "joinCode": db_myclass.joinCode,
-                     "result": "创建班级成功"}]})
+        "message": {"class_id": db_myclass.class_id, "class_name": db_myclass.class_name, "joinCode": db_myclass.joinCode,
+                     "result": "创建班级成功"}})
 
 
 @app.get("/class/classList/{id}")
