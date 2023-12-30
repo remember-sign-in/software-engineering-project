@@ -77,7 +77,7 @@ def kick_class(id: int, class_id: int, db: Session) -> int:
 # 创建新班级
 def create_class(id: int, name: str, stuNum: int, db: Session) -> models.MyClass:
     joinCode = result = ''.join(random.sample(string.ascii_letters + string.digits, 8))
-    db_myclass = db.query(models.MyClass).filter(models.MyClass.joinCode == joinCode).first()
+    db_myclass = db.query(models.MyClass).filter(models.MyClass.class_name == name).first()
     if db_myclass:
         return None
     db_myclass = models.MyClass(id=id, class_name=name, numbers=stuNum, joinCode=joinCode)
