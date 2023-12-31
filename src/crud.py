@@ -4,7 +4,7 @@ from random import choice
 import responses
 from typing import List, Dict, Any
 
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, desc
 
 import schemas
 from sqlalchemy.orm import Session
@@ -101,8 +101,10 @@ def join_class(id: int, joinCode: str, db: Session) -> int:
     db_myclass = db.query(models.MyClass).filter(models.MyClass.joinCode == joinCode).first()
     if not db_myclass:
         return 0
+    if db_myclass.id == id:
+        return 2
     if not db.query(models.JoinClass).filter(
-            models.JoinClass.id == id and models.JoinClass.class_id == db_myclass.class_id).first():
+            models.JoinClass.id == id , models.JoinClass.class_id == db_myclass.class_id).first():
         db_joinclass = models.JoinClass(id=id, class_id=db_myclass.class_id)
         db.add(db_joinclass)
         db.commit()
@@ -163,11 +165,15 @@ def EndSign(db: Session, checkIn_id: int) -> int:
     return 1
 
 
-def signUp(id: int, checkin_id: int,  currenttime: DateTime, signIn_number:str,db: Session) -> int:
-    db_class = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == checkin_id).first()
-    # print("签到", db_class.signIn_number)
-    if db_class and db_class.start_time <= currenttime <= db_class.end_time and db_class.signIn_number ==  signIn_number:
-        db.query(models.signInRecord).filter(models.signInRecord.id == id , models.signInRecord.check_in_id == checkin_id).update({models.signInRecord.signIn_time:currenttime,models.signInRecord.signIn_status:1})
+def signUp(id: int, class_id: int,  currenttime: DateTime, signIn_number:str,db: Session) -> int:
+    db_class = db.query(models.checkInRecord).filter(models.checkInRecord.class_id == class_id).order_by(desc(models.checkInRecord.check_in_id)).first()
+    if not db_class:
+        return 0
+    if not db.query(models.JoinClass).filter(models.JoinClass.id == id, models.JoinClass.class_id == db_class.class_id).first():
+        return 0
+    print("签到", db_class.signIn_number)
+    if db_class.start_time <= currenttime <= db_class.end_time and db_class.signIn_number ==  signIn_number:
+        db.query(models.signInRecord).filter(models.signInRecord.id == id,models.checkInRecord.check_in_id == db_class.check_in_id).update({models.signInRecord.signIn_time:currenttime,models.signInRecord.signIn_status:1})
         db.commit()
         return 1
     return 0

@@ -134,16 +134,18 @@ async def getClassLsit(id: int, db: Session = Depends(get_db)):
     if not db_user:
         return responses.JSONResponse(content={"items": "null"})
     return responses.JSONResponse(
-        content={[{"name": item.name, "gov_class": item.admin_class, "id": item.id} for item in db_user]})
+        content={"class":[{"name": item.name, "gov_class": item.admin_class, "id": item.id} for item in db_user]})
 
 
 @app.post("/class/joinClass")
 async def joinClass(id: int, joinCode: str, db: Session = Depends(get_db)):
     flag = crud.join_class(id, joinCode, db)
     if flag == 0:
-        return responses.JSONResponse(content={"info": "加入班级失败"})
+        return responses.JSONResponse(content={"info": "该班级不存在"})
     elif flag == 1:
         return responses.JSONResponse(content={"info": "加入班级成功"})
+    elif flag == 2:
+        return responses.JSONResponse(content={"info": "这是你创建的班级"})
     else:
         return responses.JSONResponse(content={"info": "已经加入过此班级"})
 
@@ -158,7 +160,7 @@ async def deleteClass(class_id: int, db: Session = Depends(get_db)):
 async def start_sign(class_id: int, time: int, db: Session = Depends(get_db)):
     flag = crud.StartSign(db, class_id, time)
     if flag:
-        return responses.JSONResponse(content={"message": [{"签到id": flag.check_in_id, "result": "发起签到成功！"}]})
+        return responses.JSONResponse(content={"message": [{"checkin_id": flag.check_in_id, "result": "发起签到成功！","signup_code":flag.signIn_number}]})
     else:
         return responses.JSONResponse(content={"message": [{"result": "发起签到失败！"}]})
 
@@ -173,9 +175,9 @@ async def end_sign(checkIn_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/user/signUp")
-async def sign_up(id: int, checkin_id: int, signIn_number:str,db: Session = Depends(get_db)):
+async def sign_up(id: int, class_id: int, signIn_number:str,db: Session = Depends(get_db)):
     current_time = datetime.now()
-    flag = crud.signUp(id,checkin_id,current_time,signIn_number,db)
+    flag = crud.signUp(id,class_id,current_time,signIn_number,db)
     if flag == 1:
         return responses.JSONResponse(content={"message": [{"用户id": id, "result": "签到成功！"}]})
     else:
