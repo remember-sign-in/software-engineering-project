@@ -4,7 +4,7 @@ from random import choice
 import responses
 from typing import List, Dict, Any
 
-from sqlalchemy import DateTime, desc
+from sqlalchemy import DateTime, desc, case
 
 import schemas
 from sqlalchemy.orm import Session
@@ -39,7 +39,7 @@ def get_my_class(db: Session, id: int) -> models.MyClass:
 
 
 def get_search_class(class_name, db: Session) -> models.MyClass:
-    return db.query(models.MyClass).filter(models.MyClass.class_name == class_name).all()
+    return db.query(models.MyClass).filter(models.MyClass.class_name == class_name).first()
 
 
 # 查询用户加入的班级
@@ -55,6 +55,10 @@ def get_join_class(db: Session, id: int) -> [models.MyClass]:
 def exit_class(id: int, class_id: int, db: Session) -> int:
     db_exitclass = db.query(models.JoinClass).filter(models.JoinClass.id == id,
                                                      models.JoinClass.class_id == class_id).first()
+    db_createclass = db.query(models.MyClass).filter(models.MyClass.class_id == class_id,
+                                                     models.MyClass.id == id).first()
+    if db_createclass:
+        return 0
     if db_exitclass:
         db.delete(db_exitclass)
         db.commit()
@@ -66,6 +70,9 @@ def exit_class(id: int, class_id: int, db: Session) -> int:
 def kick_class(id: int, class_id: int, db: Session) -> int:
     db_exitclass = db.query(models.JoinClass).filter(models.JoinClass.id == id,
                                                      models.JoinClass.class_id == class_id).first()
+    db_createclass = db.query(models.MyClass).filter(models.MyClass.class_id ==class_id,models.MyClass.id == id).first()
+    if db_createclass:
+        return 0
     if db_exitclass:
         db.delete(db_exitclass)
         db.commit()
@@ -125,6 +132,15 @@ def delete_class(db: Session, class_id: int) -> int:
     for student in db_students:
         db.delete(student)
     db.commit()
+    db_checkin = db.query(models.checkInRecord).filter(models.checkInRecord.class_id == class_id).all()
+    check_in_list = [item.check_in_id for item in db_checkin]
+    db_signin = db.query(models.signInRecord).filter(models.signInRecord.check_in_id.in_(check_in_list)).all()
+    for signin in db_signin:
+        db.delete(signin)
+    db.commit()
+    for checkin in db_checkin:
+        db.delete(checkin)
+    db.commit()
     return 1
 
 
@@ -164,6 +180,17 @@ def EndSign(db: Session, checkIn_id: int) -> int:
     db.commit()
     return 1
 
+def getclassInfo(db:Session, classid: int):
+    db_class = db.query(models.MyClass).filter(models.MyClass.class_id == classid).first()
+    if not db_class:
+        return {}
+    grouped_stats = db.query(
+        models.JoinClass.class_id,
+        func.count(models.JoinClass.id).label('total'),
+    ).filter(models.JoinClass.class_id == classid).first()
+    return {"class_id":str(db_class.class_id),"class_num":db_class.class_name,"creator_id":db_class.id,
+            "total":str(grouped_stats.total)}
+
 
 def signUp(id: int, class_id: int,  currenttime: DateTime, signIn_number:str,db: Session) -> int:
     db_class = db.query(models.checkInRecord).filter(models.checkInRecord.class_id == class_id).order_by(desc(models.checkInRecord.check_in_id)).first()
@@ -175,6 +202,9 @@ def signUp(id: int, class_id: int,  currenttime: DateTime, signIn_number:str,db:
     if db_class.start_time <= currenttime <= db_class.end_time and db_class.signIn_number ==  signIn_number:
         db.query(models.signInRecord).filter(models.signInRecord.id == id,models.checkInRecord.check_in_id == db_class.check_in_id).update({models.signInRecord.signIn_time:currenttime,models.signInRecord.signIn_status:1})
         db.commit()
+        return 1
+    flag = db.query(models.signInRecord).filter(models.signInRecord.id == id,models.signInRecord.check_in_id == db_class.check_in_id).first()
+    if flag.signIn_status == 1:
         return 1
     return 0
 
@@ -202,24 +232,31 @@ def del_record(user_id: int, checkin_id: int ,db:Session) -> int:
     return 0
 
 # 获取某次签到记录具体列表
-def get_record( checkin_id: int, db:Session) -> List[models.signInRecord]:
-    db_record = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == checkin_id).all()
-    id_result = [item.id for item in db_record]
-    user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
-    user_data_dict = {user.id: {"name": user.name, "gov_class": user.admin_class} for user in
-                      user_result}
-
-    result = []
-    for item in db_record:
-        user_data = user_data_dict.get(item.id, {})
-        result.append(
-            {
-                **user_data,
-                "status": sign_in_status(item.signIn_status),
-                "time": str(item.signIn_time),
-                "id": str(item.check_in_id),
-            }
-        )
+def get_record( checkin_id: int, db:Session):
+    db_checkInRecord = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == checkin_id).first()
+    # 创建一个将 User id 映射到 User name 的字典
+    # print(user_dict,id_list)
+    # 构建最终的结果字典
+    # print(result_dict)
+    # 获取每个 check_in_id 的签到和未签到人数
+    if not db_checkInRecord:
+        return 0
+    name = db.query(models.User).filter(models.User.id == db_checkInRecord.id).first()
+    classname = db.query(models.MyClass).filter(models.MyClass.class_id == db_checkInRecord.class_id).first()
+    grouped_stats = db.query(
+        models.signInRecord.check_in_id,
+        func.count(models.signInRecord.id).label('total_records'),
+        func.sum(case((models.signInRecord.signIn_status == 0, 1), else_=0)).label('not_signed_in'),
+        func.sum(case((models.signInRecord.signIn_status != 0, 1), else_=0)).label('signed_in')
+    ).filter(models.signInRecord.check_in_id == checkin_id).first()
+    result = {
+        "name":name.name,
+        "class": classname.class_name,
+        "time": str(db_checkInRecord.start_time),
+        "total": str(grouped_stats.total_records),
+        "signed": str(grouped_stats.signed_in),
+        "unsigned": str(grouped_stats.not_signed_in),
+    }
     return result
 
 # 查询该班级是否存在
@@ -248,21 +285,60 @@ def sign_in_status(status_code):
         return "未知状态"
 
 
-def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
-    query_result = db.query(models.signInRecord).filter(models.signInRecord.check_in_id.in_(record_list)).all()
-    id_result = [item.id for item in query_result]
-    user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
-    user_data_dict = {user.id: {"name": user.name,  "gov_class": user.admin_class} for user in
-                      user_result}
+# def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
+#     query_result = db.query(models.signInRecord).filter(models.signInRecord.check_in_id.in_(record_list)).all()
+#     id_result = [item.id for item in query_result]
+#     user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
+#     user_data_dict = {user.id: {"name": user.name,  "gov_class": user.admin_class} for user in
+#                       user_result}
+#
+#     result = []
+#     for item in query_result:
+#         user_data = user_data_dict.get(item.id, {})
+#         result.append(
+#             {
+#                 **user_data,
+#                 "status": sign_in_status(item.signIn_status),
+#                 "id": str(item.check_in_id),
+#             }
+#         )
+#
+#     return result
 
+from sqlalchemy import func
+
+def query_record_message(record_list: [], db: Session) -> List[Dict[str, Any]]:
+    l = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id.in_(record_list)).all()
+    # 假设 id_list 已经存在并且是 [[check_in_id1, id1], [check_in_id2, id2], ...] 的形式
+    list = [[item.check_in_id, item.id] for item in l]
+    checkin_list = [item.check_in_id for item in l]
+    id_list = [item.id for item in l]
+    # 创建一个将 User id 映射到 User name 的字典
+    user_dict = {user.id: user.name for user in db.query(models.User).filter(models.User.id.in_(id_list)).all()}
+    # print(user_dict,id_list)
+    # 构建最终的结果字典
+    result_dict = {check_in_id: {"name": user_dict.get(id)} for check_in_id, id in list if
+                   id in user_dict}
+
+    # print(result_dict)
+    # 获取每个 check_in_id 的签到和未签到人数
+    grouped_stats = db.query(
+        models.signInRecord.check_in_id,
+        func.count(models.signInRecord.id).label('total_records'),
+        func.sum(case((models.signInRecord.signIn_status == 0, 1), else_=0)).label('not_signed_in'),
+        func.sum(case((models.signInRecord.signIn_status != 0, 1), else_=0)).label('signed_in')
+    ).filter(models.signInRecord.check_in_id.in_(checkin_list)).group_by(models.signInRecord.check_in_id)
     result = []
-    for item in query_result:
-        user_data = user_data_dict.get(item.id, {})
+    for item in grouped_stats:
+        # print("看这里",item)
+        user_data = result_dict.get(item.check_in_id, {})
         result.append(
             {
                 **user_data,
-                "status": sign_in_status(item.signIn_status),
-                "id": str(item.check_in_id),
+                "total": str(item.total_records),
+                "signed": str(item.signed_in),
+                "unsigned": str(item.not_signed_in),
+                "id": item.check_in_id
             }
         )
     return result
@@ -274,23 +350,37 @@ def getInfo(id: int, db: Session):
 
 
 def editInfo(id: int, name: str, db: Session):
-    flag = db.query(models.User).filter(models.User.id == id).update({'name': name})
+    db.query(models.User).filter(models.User.id == id).update({models.User.name: name})
+    db.commit()
+    flag = db.query(models.User).filter(models.User.id == id).first()
     return flag
 
 
-def get_one_record(id: int, db: Session) -> List[Dict[str, Any]]:
+def get_one_record(id: int, db: Session):
     recordList = db.query(models.signInRecord).filter(models.signInRecord.id == id).all()
-    return recordList
+    if not recordList:
+        return None
+    return {"items":[{ "check_in_id": item.check_in_id,
+            "signIn_time": str(item.signIn_time),
+            "signIn_status": sign_in_status(item.signIn_status)} for item in recordList]}
 
 
 def get_unsignList(check_in_id: int, db: Session):
+    if not db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == check_in_id,).first():
+        return None
     unsignList = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_in_id,
                                                       models.signInRecord.signIn_status == 0).all()
-    return unsignList
+    return {"items": [{"id": item.id,
+                       "signIn_time": str(item.signIn_time),
+                       "signIn_status": sign_in_status(item.signIn_status)} for item in unsignList]}
 
 
 def get_signList(check_in_id: int, db: Session):
+    if not db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == check_in_id,).first():
+        return None
     signList = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == check_in_id,
-                                                    models.signInRecord.signIn_status == 1).all()
-    return signList
+                                                    models.signInRecord.signIn_status.in_([1,2])).all()
+    return {"items":[{ "id": item.id,
+            "signIn_time": str(item.signIn_time),
+            "signIn_status": sign_in_status(item.signIn_status)} for item in signList]}
 
