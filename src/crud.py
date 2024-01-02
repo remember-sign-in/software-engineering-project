@@ -234,14 +234,13 @@ def del_record(user_id: int, checkin_id: int ,db:Session) -> int:
 # 获取某次签到记录具体列表
 def get_record( checkin_id: int, db:Session):
     db_checkInRecord = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == checkin_id).first()
-    # 创建一个将 User id 映射到 User name 的字典
-    # print(user_dict,id_list)
-    # 构建最终的结果字典
-    # print(result_dict)
-    # 获取每个 check_in_id 的签到和未签到人数
     if not db_checkInRecord:
         return 0
-    name = db.query(models.User).filter(models.User.id == db_checkInRecord.id).first()
+    query_result = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == checkin_id).all()
+    id_result = [item.id for item in query_result]
+    user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
+    user_data_dict = {user.id: {"name": user.name} for user in
+                      user_result}
     classname = db.query(models.MyClass).filter(models.MyClass.class_id == db_checkInRecord.class_id).first()
     grouped_stats = db.query(
         models.signInRecord.check_in_id,
@@ -249,14 +248,21 @@ def get_record( checkin_id: int, db:Session):
         func.sum(case((models.signInRecord.signIn_status == 0, 1), else_=0)).label('not_signed_in'),
         func.sum(case((models.signInRecord.signIn_status != 0, 1), else_=0)).label('signed_in')
     ).filter(models.signInRecord.check_in_id == checkin_id).first()
-    result = {
-        "name":name.name,
-        "class": classname.class_name,
-        "time": str(db_checkInRecord.start_time),
-        "total": str(grouped_stats.total_records),
-        "signed": str(grouped_stats.signed_in),
-        "unsigned": str(grouped_stats.not_signed_in),
-    }
+    result = []
+    for item in query_result:
+        user_data = user_data_dict.get(item.id, {})
+        result.append(
+            {
+                **user_data,
+                "class": classname.class_name,
+                "time": str(item.signIn_time),
+                "total": str(grouped_stats.total_records),
+                "signed": str(grouped_stats.signed_in),
+                "unsigned": str(grouped_stats.not_signed_in),
+                "status": str(item.signIn_status)
+            }
+        )
+
     return result
 
 # 查询该班级是否存在
