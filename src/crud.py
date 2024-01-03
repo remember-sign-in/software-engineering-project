@@ -22,6 +22,10 @@ def create_user(db: Session, openid: str) -> models.User:
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    new_id = db.query(models.User).filter(models.User.open_id == openid).first()
+    db.query(models.User).filter(models.User.id == new_id.id).update(
+        {'name': "未命名用户"+str(new_id.id)})
+    db.commit()
     return db_user
 
 
