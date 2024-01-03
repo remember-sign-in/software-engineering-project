@@ -55,9 +55,11 @@ def getid(code: str, db: Session = Depends(get_db)):
     openid = data["openid"]
     print(data)
     db_user = crud.get_user_by_openid(db, openid)
+    exist_flag = 1
     if not db_user:
         db_user = crud.create_user(db=db, openid=openid)
-    resp = responses.JSONResponse(content={"token": db_user.open_id, "id": db_user.id})
+        exist_flag = 0
+    resp = responses.JSONResponse(content={"token": db_user.open_id, "id": db_user.id, "exist": exist_flag})
     return resp
 
 
