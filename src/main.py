@@ -261,7 +261,7 @@ async def delrecord(user_id:int,checkin_id:int,db:Session = Depends(get_db)):
 @app.get("/record/detail")
 async def getRecord(checkin_id:int, db: Session = Depends(get_db)):
     db_record = crud.get_record(checkin_id,db)
-    if not db_record:
+    if db_record == -1:
         return responses.JSONResponse(content={"info": "checkin_id不存在"})
     return responses.JSONResponse(content=db_record)
 

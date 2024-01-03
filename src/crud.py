@@ -235,7 +235,7 @@ def del_record(user_id: int, checkin_id: int ,db:Session) -> int:
 def get_record( checkin_id: int, db:Session):
     db_checkInRecord = db.query(models.checkInRecord).filter(models.checkInRecord.check_in_id == checkin_id).first()
     if not db_checkInRecord:
-        return 0
+        return -1
     query_result = db.query(models.signInRecord).filter(models.signInRecord.check_in_id == checkin_id).all()
     id_result = [item.id for item in query_result]
     user_result = db.query(models.User).filter(models.User.id.in_(id_result)).all()
